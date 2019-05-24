@@ -133,8 +133,8 @@ public class DataHandle2 {
 				KEntity preEntity = list.get(list.size()-2);
 				KEntity ppEntity = list.get(list.size()-3);
 				//
-				boolean 绿转 = todayEntity.getDea() > 0 && preEntity.getMacd() < ppEntity.getMacd() && preEntity.getMacd() < todayEntity.getMacd() && todayEntity.getMacd() < 0;
-				boolean 红转 = todayEntity.getDea() < 0 && preEntity.getMacd() > ppEntity.getMacd() && preEntity.getMacd() > todayEntity.getMacd() && todayEntity.getMacd() > 0;
+				boolean 绿转 = preEntity.getDea() > 0 && preEntity.getMacd() < ppEntity.getMacd() && preEntity.getMacd() < todayEntity.getMacd() && todayEntity.getMacd() < 0;
+				boolean 红转 = preEntity.getDea() < 0 && preEntity.getMacd() > ppEntity.getMacd() && preEntity.getMacd() > todayEntity.getMacd() && todayEntity.getMacd() > 0;
 				
 				if(绿转 || 红转) {
 					LOGGER.info("======================================================================");
