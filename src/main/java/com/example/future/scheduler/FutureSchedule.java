@@ -38,7 +38,7 @@ public class FutureSchedule {
 	
 	
 //	@Scheduled(cron="* 55 13 * * ?")
-//	@Scheduled(cron="* */1 * * * ?")
+//	@Scheduled(cron="1 43 17 * * ?")
     public void test1(){
 
 		LOGGER.info("执行任务：" + new Date());
@@ -110,8 +110,9 @@ public class FutureSchedule {
 		
 //        String url = null;
 		try {
-			mailService.sendMail(list.toString());
-			
+			if(list.size() > 0) {
+				mailService.sendMail(list.toString());
+			}
 			LOGGER.info(list.toString());
 //			url = "http://localhost:8761/sendMail?content="+URLEncoder.encode(list.toString(),"UTF-8");
 		} catch (Exception e) {
