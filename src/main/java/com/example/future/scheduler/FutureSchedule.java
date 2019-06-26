@@ -17,6 +17,7 @@ import org.springframework.stereotype.Component;
 import com.example.future.config.FutureConfig;
 import com.example.future.service.FutureService;
 import com.example.future.service.MailService;
+import com.example.future.tools.DingDingMessageUtil;
 import com.example.future.tools.PageUtil;
 
 @Component
@@ -37,21 +38,14 @@ public class FutureSchedule {
 	private Map<String,String> map = new HashMap<>();
 	
 	
-//	@Scheduled(cron="* 55 13 * * ?")
+//	@Scheduled(cron="* */1 09 * * ?")
 //	@Scheduled(cron="1 43 17 * * ?")
     public void test1(){
 
 		LOGGER.info("执行任务：" + new Date());
+		LOGGER.info("" + config.isSendMail());
+
 		
-		if(map.size() == 0) {
-			for(String name:config.getAlertNameList()) {
-				LOGGER.info(name);
-				map.put(name.split("_")[0], name.split("_")[1]);
-			}
-		}
-//		for(String key:map.keySet()) {
-//			LOGGER.info(key +":" + map.get(key));
-//		}
 		
 	}
 	
@@ -89,7 +83,7 @@ public class FutureSchedule {
     }
 	
 			
-	@Scheduled(cron="0 30,40,50 14 * * ?")
+	@Scheduled(cron="0 30,40,31 18 * * ?")
     public void printDate(){
 		
 		LOGGER.info("执行任务：" + new Date());
@@ -111,9 +105,14 @@ public class FutureSchedule {
 //        String url = null;
 		try {
 			if(list.size() > 0) {
-				mailService.sendMail(list.toString());
+				if(config.isSendMail()) {
+					mailService.sendMail(list.toString());
+				}
+				if(config.isSendDingtalk()) {
+					DingDingMessageUtil.sendTextMessage(list.toString(), config.getAccessToken());
+				}
 			}
-			LOGGER.info(list.toString());
+			LOGGER.info(">>>>>>>>>>>>>>" + list.toString());
 //			url = "http://localhost:8761/sendMail?content="+URLEncoder.encode(list.toString(),"UTF-8");
 		} catch (Exception e) {
 			LOGGER.error(e.getMessage(),e);

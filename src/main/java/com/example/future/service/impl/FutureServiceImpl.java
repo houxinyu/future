@@ -28,5 +28,6 @@ public class FutureServiceImpl implements FutureService {
 		dataHandle2.caculateMACD();
 		return dataHandle2.caculateAlert();
 	}
+	
 
 }

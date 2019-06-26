@@ -226,7 +226,7 @@ public class DataHandle2 {
 			LOGGER.info("历史数据：" + list.size());
 			LOGGER.info("今日数据:" + AlertUtil.抓新浪取历史数据(urlCodeName, min));
 			
-			String[] data = AlertUtil.抓新浪取历史数据(urlCodeName, min).replace("varhq_str_M0=\"", "").replace("\"",
+			String[] data = AlertUtil.抓新浪取历史数据(urlCodeName, min).replace("\"",
 			"").split(",");
 			
 			KEntity todayEntity = new KEntity();

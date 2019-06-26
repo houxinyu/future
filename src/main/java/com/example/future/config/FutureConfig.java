@@ -12,13 +12,34 @@ import org.springframework.stereotype.Component;
 @ConfigurationProperties(prefix = "future")
 public class FutureConfig {
 	
-	@Value("#{'${futrue.alertList}'.split(',')}")
+	@Value("#{'${future.alertList}'.split(',')}")
 	private List<String> alertList;
 	
 
-	@Value("#{'${futrue.alertNameList}'.split(',')}")
+	@Value("#{'${future.alertNameList}'.split(',')}")
 	private List<String> alertNameList;
 	
+	//futrue.accesstoken
+//	@Value("${accessToken}") 
+//	@Value("${futrue.accessToken}")
+	@Value("${future.accessToken}")
+	private String accessToken;
+	
+	@Value("${future.sendMail}")
+	private boolean sendMail;
+	
+
+	@Value("${future.sendDingtalk}")
+	private boolean sendDingtalk;
+	
+	public String getAccessToken() {
+		return accessToken;
+	}
+
+	public void setAccessToken(String accessToken) {
+		this.accessToken = accessToken;
+	}
+
 	public List<String> getAlertList() {
 		return alertList;
 	}
@@ -35,5 +56,21 @@ public class FutureConfig {
 		this.alertNameList = alertNameList;
 	}
 
+	
+	public boolean isSendMail() {
+		return sendMail;
+	}
+
+	public void setSendMail(boolean sendMail) {
+		this.sendMail = sendMail;
+	}
+
+	public boolean isSendDingtalk() {
+		return sendDingtalk;
+	}
+
+	public void setSendDingtalk(boolean sendDingtalk) {
+		this.sendDingtalk = sendDingtalk;
+	}
 
 }
