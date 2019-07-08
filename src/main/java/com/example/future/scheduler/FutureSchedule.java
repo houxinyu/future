@@ -82,8 +82,10 @@ public class FutureSchedule {
 
     }
 	
+    //0 15 10 ? * MON-FRI
 			
-	@Scheduled(cron="0 30,40,31 18 * * ?")
+    @Scheduled(cron="0 30,40,50 14 ? * MON-FRI")
+	//@Scheduled(cron="0 30,40,50 14 * * ?")
     public void printDate(){
 		
 		LOGGER.info("执行任务：" + new Date());
