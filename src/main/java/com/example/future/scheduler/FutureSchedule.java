@@ -1,11 +1,12 @@
 package com.example.future.scheduler;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,7 +19,6 @@ import com.example.future.config.FutureConfig;
 import com.example.future.service.FutureService;
 import com.example.future.service.MailService;
 import com.example.future.tools.DingDingMessageUtil;
-import com.example.future.tools.PageUtil;
 
 @Component
 @ConfigurationProperties
@@ -50,11 +50,13 @@ public class FutureSchedule {
 	}
 	
 	
-//	@Scheduled(cron="* 55 13 * * ?")
+//	@Scheduled(cron="01 12 18 * * ?")
 //	@Scheduled(cron="01 24 10 * * ?")
     public void test(){
 
 		LOGGER.info("执行任务：" + new Date());
+		
+		printDate();
 		
 		if(map.size() == 0) {
 			for(String name:config.getAlertNameList()) {
@@ -98,23 +100,38 @@ public class FutureSchedule {
 		
 		ArrayList<String> list = futureService.futureAlertMain();
 		
-		for(int i=0;i<list.size();i++) {
-			if(map.get(list.get(i)) != null) {
-				list.set(i, map.get(list.get(i)) + "(" + list.get(i) + ")");
+		List<String> alertList = new ArrayList<>();
+		Set<String> alertSet = new HashSet<>();
+		for(int i=0; i<list.size(); i++) {
+			if(!alertSet.contains(list.get(i).replaceAll("[0-9]+", ""))) {
+				if(map.get(list.get(i)) != null) {
+					alertList.add(map.get(list.get(i)) + "(" + list.get(i) + ")");
+				}else {
+					alertList.add(list.get(i) + "(" + list.get(i) + ")");
+				}
 			}
+			alertSet.add(list.get(i).replaceAll("[0-9]+", ""));
 		}
+		
+//		for(int i=0;i<list.size();i++) {
+//			if(map.get(list.get(i)) != null) {
+//				list.set(i, map.get(list.get(i)) + "(" + list.get(i) + ")");
+//			}
+//		}
 		
 //        String url = null;
 		try {
-			if(list.size() > 0) {
+			if(alertList.size() > 0) {
 				if(config.isSendMail()) {
-					mailService.sendMail(list.toString());
+					mailService.sendMail(alertList.toString());
 				}
 				if(config.isSendDingtalk()) {
-					DingDingMessageUtil.sendTextMessage(list.toString(), config.getAccessToken());
+//					DingDingMessageUtil.sendTextMessage(list.toString().replaceAll(",", "\n\n"), config.getAccessToken());
+//					Thread.sleep(1000);
+					DingDingMessageUtil.sendTextMessage(alertList.toString().replaceAll(",", "\n\n"), config.getAccessToken());
 				}
 			}
-			LOGGER.info(">>>>>>>>>>>>>>" + list.toString());
+			LOGGER.info(">>>>>>>>>>>>>>" + alertList.toString());
 //			url = "http://localhost:8761/sendMail?content="+URLEncoder.encode(list.toString(),"UTF-8");
 		} catch (Exception e) {
 			LOGGER.error(e.getMessage(),e);
