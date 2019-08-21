@@ -6,9 +6,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.example.future.config.FutureConfig;
+import com.example.future.macd.DataHandle2;
 import com.example.future.service.FutureService;
-
-import macd.DataHandle2;
 
 
 @Service

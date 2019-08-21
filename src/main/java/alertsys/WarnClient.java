@@ -3,7 +3,8 @@ package alertsys;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import tool.*;
+import com.example.future.tools.MusicPlay;
+import com.example.future.tools.时间工具;
 
 public class WarnClient {
 	private static final Logger LOGGER = LoggerFactory.getLogger(WarnClient.class);

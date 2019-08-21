@@ -4,7 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import macd.DataHandle2;
+import com.example.future.macd.DataHandle2;
 
 @Configuration
 public class BeanConfig {

@@ -3,9 +3,9 @@ package autotrader;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 
-import macd.AlertUtil;
-import macd.DataHandle;
-import macd.KEntity;
+import com.example.future.macd.AlertUtil;
+import com.example.future.macd.DataHandle;
+import com.example.future.macd.KEntity;
 
 public class HourBreak {
 

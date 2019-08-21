@@ -1,6 +1,6 @@
 package datacrawl;
 
-import tool.时间工具;
+import com.example.future.tools.时间工具;
 
 public class 测试分类 {
 	public static void main(String[] args) {

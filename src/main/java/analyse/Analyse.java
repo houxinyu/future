@@ -8,20 +8,19 @@ import java.util.HashMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import macd.AlertUtil;
-import macd.KEntity;
-import macd.MaAndMacd;
-import macd.MyATR;
-import macd.MyMA;
-import macd.MyMACD;
-import macd.Structure;
-
-import tool.CSVUtils;
-import tool.MailTool;
-import tool.文件处理工具;
-import tool.日志工具;
-import tool.时间工具;
-import tool.配置文件;
+import com.example.future.macd.AlertUtil;
+import com.example.future.macd.KEntity;
+import com.example.future.macd.MaAndMacd;
+import com.example.future.macd.MyATR;
+import com.example.future.macd.MyMA;
+import com.example.future.macd.MyMACD;
+import com.example.future.macd.Structure;
+import com.example.future.tools.CSVUtils;
+import com.example.future.tools.MailTool;
+import com.example.future.tools.文件处理工具;
+import com.example.future.tools.日志工具;
+import com.example.future.tools.时间工具;
+import com.example.future.tools.配置文件;
 
 public class Analyse {
 	private static final Logger LOGGER = LoggerFactory.getLogger(Analyse.class);

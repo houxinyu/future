@@ -3,8 +3,6 @@ package alertsys;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import tool.*;
 /**
  * 预警系统启动类
  * @author content
