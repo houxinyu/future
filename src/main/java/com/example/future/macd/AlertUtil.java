@@ -206,6 +206,7 @@ public class AlertUtil {
 		return kEntityListMap;
 	}
 	
+	
 	public static synchronized KEntity getEntityFromMap(String key){
 		return kEntityMap.get(key);
 	}
@@ -365,6 +366,8 @@ public class AlertUtil {
 		
 		String test="Hx   ddd  ddd iee   ee   ";
 		System.out.println(test.trim().replaceAll("\\s+", " "));
+		
+		System.out.println(抓新浪取历史数据("",5));
 		
 	}
 
