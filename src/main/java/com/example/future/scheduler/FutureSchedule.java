@@ -56,7 +56,7 @@ public class FutureSchedule {
 
 		LOGGER.info("执行任务：" + new Date());
 		
-		printDate();
+		alertForDay();
 		
 		if(map.size() == 0) {
 			for(String name:config.getAlertNameList()) {
@@ -84,7 +84,7 @@ public class FutureSchedule {
 
     }
     
-    @Scheduled(cron="45 4,9,14,19,24,29,34,39,44,49,54,59 21-23 ? * MON-FRI")
+    //@Scheduled(cron="45 4,9,14,19,24,29,34,39,44,49,54,59 21-23 ? * MON-FRI")
 	//@Scheduled(cron="0 30,40,50 14 * * ?")
     public void alertFor5min(){
 		
@@ -141,7 +141,7 @@ public class FutureSchedule {
 			
     @Scheduled(cron="0 30,40,50 14 ? * MON-FRI")
 	//@Scheduled(cron="0 30,40,50 14 * * ?")
-    public void printDate(){
+    public void alertForDay(){
 		
 		LOGGER.info("执行任务：" + new Date());
 		
