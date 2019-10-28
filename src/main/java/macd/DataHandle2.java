@@ -78,10 +78,15 @@ public class DataHandle2 {
 
 		ArrayList<KEntity> list=new ArrayList<KEntity>();
 		for(String urlCodeName:alertList) {
-			list=loadHisMinData(urlCodeName,0);
-			if(list.size()>0){
-				AlertUtil.putListToMap(list.get(0).getName()+list.get(0).getMin(), delSubList(list,240));
+			try {
+				list=loadHisMinData(urlCodeName,0);
+				if(list.size()>0){
+					AlertUtil.putListToMap(list.get(0).getName()+list.get(0).getMin(), delSubList(list,240));
+				}
+			}catch(Exception e) {
+				LOGGER.error(e.getMessage(),e);
 			}
+
 		}
 		long end= System.currentTimeMillis();
 		LOGGER.info("加载今日K线数据完毕。耗时：" + (start - end)/1000+"秒");

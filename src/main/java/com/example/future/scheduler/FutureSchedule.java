@@ -39,11 +39,13 @@ public class FutureSchedule {
 	
 	
 //	@Scheduled(cron="* */1 09 * * ?")
-//	@Scheduled(cron="1 43 17 * * ?")
+	@Scheduled(cron="0 34 15 * * ?")
     public void test1(){
 
 		LOGGER.info("执行任务：" + new Date());
 		LOGGER.info("" + config.isSendMail());
+		//printDate();
+		DingDingMessageUtil.sendTextMessage("测试", config.getAccessToken());
 
 		
 		
