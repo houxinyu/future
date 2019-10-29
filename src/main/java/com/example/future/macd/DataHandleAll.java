@@ -23,13 +23,13 @@ import com.example.future.tools.配置文件;
  */
 
 //@Component
-public class DataHandle2 {
-	private static final Logger LOGGER = LoggerFactory.getLogger(DataHandle2.class);
+public class DataHandleAll {
+	private static final Logger LOGGER = LoggerFactory.getLogger(DataHandleAll.class);
 	
 
 	private FutureConfig config;
 	
-	public DataHandle2(FutureConfig config) {
+	public DataHandleAll(FutureConfig config) {
 		this.config = config;
 	}
 	
@@ -45,21 +45,28 @@ public class DataHandle2 {
 	
 
 	public  void clearHistoryData() {
-		//AlertUtil.getKentityListMap().clear();
+		AlertUtil.getKentityListMap().clear();
 	}
 	
 	
-	public  void loadHistoryData(){
+	public  void loadHistoryData(int min){
 		LOGGER.info("加载历史K线数据...");
 		long start= System.currentTimeMillis();
-		List<String> alertList = config.getAlertList();
+		List<String> alertNameList = config.getAlertList();
+		
+		List<String> alertList =new ArrayList<>();
+		for(String code:alertNameList) {
+			if("BU0,MA0,RU0,TA0,HC0,RB0,I0,FG0,JM0,J0,ZC0,RM0,M0,A0,P0,Y0,OI0,CF0,SR0,C0,CS0,JD0,PP0,L0,V0,EG0,AP0,SF0,SM0,SP0".indexOf(code) == -1) {
+				alertList.add(code);
+			}
+		}
 		
 		LOGGER.info("alertList:" + alertList);
 		
 		ArrayList<KEntity> list=new ArrayList<KEntity>();
 		for(String urlCodeName: alertList) {
-			list=loadHisMinData(urlCodeName,3600);
-			LOGGER.info((urlCodeName+"3600")+"历史数据 size:" + list.size());
+			list=loadHisMinData(urlCodeName,min);
+			LOGGER.info((urlCodeName+"5")+"历史数据 size:" + list.size());
 			if(list.size()>0){
 				AlertUtil.putListToMap(list.get(0).getName()+list.get(0).getMin(), delSubList(list,240));
 			}
@@ -78,7 +85,7 @@ public class DataHandle2 {
 
 		ArrayList<KEntity> list=new ArrayList<KEntity>();
 		for(String urlCodeName:alertList) {
-			list=loadHisMinData(urlCodeName,0);
+			list=loadHisMinData(urlCodeName,5);
 			if(list.size()>0){
 				AlertUtil.putListToMap(list.get(0).getName()+list.get(0).getMin(), delSubList(list,240));
 			}
@@ -108,12 +115,13 @@ public class DataHandle2 {
 	}
 
 
-	public  void caculateMACD() {
+	public  void caculateMACD(int min) {
 //		String[] alertList=配置文件.获取配置项("alertList").split(",");
 		List<String> alertList = config.getAlertList();
 		for(String urlCode:alertList){
-			ArrayList<KEntity> list = AlertUtil.getListFromMap(urlCode + "3600");
+			ArrayList<KEntity> list = AlertUtil.getListFromMap(urlCode + min);
 			if(list != null && list.size() != 0) {
+				MyMA.setMA(list, 20);
 				MyMACD.setMACD(list);
 			}
 		}
@@ -124,7 +132,45 @@ public class DataHandle2 {
 		ArrayList<String> alertCodeList = new ArrayList<>();
 		List<String> alertList = config.getAlertList();
 		for(String urlCode:alertList){
-			ArrayList<KEntity> list = AlertUtil.getListFromMap(urlCode + "3600");
+			ArrayList<KEntity> list = AlertUtil.getListFromMap(urlCode + 5);
+			if(list == null || list.size() == 0) {
+				LOGGER.warn(urlCode + "数据不存在！");
+				//发送邮件
+			}else {
+				KEntity todayEntity = list.get(list.size()-1);
+				KEntity preEntity = list.get(list.size()-2);
+				KEntity ppEntity = list.get(list.size()-3);
+				//
+				boolean 绿转 = preEntity.getDea() > 0 && preEntity.getMacd() < ppEntity.getMacd() && preEntity.getMacd() < todayEntity.getMacd() && todayEntity.getMacd() < 0 && todayEntity.getClose() > todayEntity.getMA20();
+				boolean 红转 = preEntity.getDea() < 0 && preEntity.getMacd() > ppEntity.getMacd() && preEntity.getMacd() > todayEntity.getMacd() && todayEntity.getMacd() > 0 && todayEntity.getClose() < todayEntity.getMA20();
+				
+				if(绿转 || 红转) {
+					LOGGER.info("======================================================================");
+					
+					LOGGER.info("品种:" + urlCode + " 出现转折:" + (绿转?"绿转":"红转"));
+					
+					LOGGER.info("todayEntity.Dea：" + todayEntity.getDea() + ",ppEntity.macd：" + ppEntity.getMacd() + "," +  "preEntity.macd:" + preEntity.getMacd()+ ",todayEntity.macd:" + todayEntity.getMacd()+ ",todayEntity.close:" + todayEntity.getClose()+ ",todayEntity.ma20:" + todayEntity.getMA20());
+					
+					
+					alertCodeList.add(urlCode);
+					
+					LOGGER.info("======================================================================");
+				}
+
+			}
+		}
+		
+		LOGGER.info("alertCodeList size:" + alertCodeList.size());
+		
+		return alertCodeList;
+	}
+	
+	public  ArrayList<String> caculateAlert(int min) {
+//		String[] alertList=配置文件.获取配置项("alertList").split(",");
+		ArrayList<String> alertCodeList = new ArrayList<>();
+		List<String> alertList = config.getAlertList();
+		for(String urlCode:alertList){
+			ArrayList<KEntity> list = AlertUtil.getListFromMap(urlCode + min);
 			if(list == null || list.size() == 0) {
 				LOGGER.warn(urlCode + "数据不存在！");
 				//发送邮件
@@ -207,16 +253,28 @@ public class DataHandle2 {
 	public static ArrayList<KEntity> loadHisMinData(String urlCodeName,int min){
 		ArrayList<KEntity> list=new ArrayList<KEntity>();
 //		String codeName=AlertUtil.getCodeName(urlCodeName);
-		if(min==3600 || min == 5){//处理历史日线数据
+		if(min != 0){//处理历史日线数据
 			String[] data = AlertUtil.抓新浪取历史数据(urlCodeName, min).replace("\"", "").replace("[",
 			"").split(";");
-			for (int i = 0; i <=data.length-1; i++) {
-				int r=loadHisData(data[i],urlCodeName,min,list);
-				if(r==0){//无效数据
-					break;
+			//日线和其他时间顺序不一样
+			if(min == 3600) {
+				for (int i = 0; i <=data.length-1; i++) {
+					int r=loadHisData(data[i],urlCodeName,min,list);
+					if(r==0){//无效数据
+						break;
+					}
+				}
+			}else {
+				for (int i = data.length-1; i>=0; i--) {
+					int r=loadHisData(data[i],urlCodeName,min,list);
+					if(r==0){//无效数据
+						break;
+					}
 				}
 			}
-		}else if(min==0){//处理当天日线数据
+			
+
+		}else{//处理当天日线数据
 			//varhq_str_M0="豆粕连续,145958,开盘价[index=2],最高价[index=3],最低价[index=4],3178,3153,最新价[index=7],3154,3162,3169,1325,223,1371608,成交量[index=14],连,豆粕,2013-06-28[index=17]";
 			
 			list = AlertUtil.getListFromMap(urlCodeName+3600);
@@ -267,7 +325,7 @@ public class DataHandle2 {
 //			System.out.println(stopTime+" "+infos[0]);
 			if(dataTime.getTime()>skipTime.getTime()){
 				//break;
-				return 0;
+				//return 0;
 			}
 		} catch (ParseException e) {
 			// TODO Auto-generated catch block
@@ -361,6 +419,7 @@ public class DataHandle2 {
 //		LOGGER.info(AlertUtil.抓新浪取历史数据("BU0,MA0,RU0,TA0,HC0,RB0,I0,FG0,JM0,J0,ZC0,RM0,M0,A0,P0,Y0,OI0,CF0,SR0,C0,CS0,JD0,PP0,L0,V0,EG0,AP0,SF0,SM0,SP0", 0).replaceAll("var hq_str_", ""));
 //		DataHandle2 d = new DataHandle2();
 //		d.loadTodayKEntityList();
+		LOGGER.info(loadHisMinData("ma0",5) + "");
 	}
 
 

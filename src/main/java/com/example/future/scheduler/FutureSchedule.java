@@ -39,16 +39,15 @@ public class FutureSchedule {
 	
 	
 //	@Scheduled(cron="* */1 09 * * ?")
-	@Scheduled(cron="0 57 13 * * ?")
+	@Scheduled(cron="30 40 17 * * ?")
     public void test1(){
 
 		LOGGER.info("执行任务：" + new Date());
 		LOGGER.info("" + config.isSendMail());
-		alertForDay();
-
-		
-		
+		alert(30);
 	}
+	
+	
 	
 	
 //	@Scheduled(cron="01 12 18 * * ?")
@@ -137,12 +136,29 @@ public class FutureSchedule {
 
 
     }
-	
-    //0 15 10 ? * MON-FRI
-			
+    
+	//日线预警
     @Scheduled(cron="0 30,40,50 14 ? * MON-FRI")
-	//@Scheduled(cron="0 30,40,50 14 * * ?")
     public void alertForDay(){
+    	alert(3600);
+    }
+    
+    
+    //30分钟预警
+    @Scheduled(cron="0 28,58 9,10,11,14,21,22,23 ? * MON-FRI")
+    public void alertFor30(){
+    	alert(30);
+    }
+    
+    //60分钟预警
+    @Scheduled(cron="0 58 9,10,14,21,22,23 ? * MON-FRI")
+    public void alertFor60(){
+    	alert(60);
+    }
+	
+	
+
+    public void alert(int min){
 		
 		LOGGER.info("执行任务：" + new Date());
 		
@@ -152,7 +168,7 @@ public class FutureSchedule {
 			}
 		}
 		
-		ArrayList<String> list = futureService.futureAlertMain();
+		ArrayList<String> list = futureService.futureAlert(min);
 		
 		List<String> alertList = new ArrayList<>();
 		Set<String> alertSet = new HashSet<>();

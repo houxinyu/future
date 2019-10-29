@@ -7,5 +7,7 @@ public interface FutureService {
 	public  ArrayList<String> futureAlertMain();
 	
 	public  ArrayList<String> futureAlertFiveMin();
+	
+	public  ArrayList<String> futureAlert(int min);
 
 }

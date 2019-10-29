@@ -19,8 +19,8 @@ public class KEntity implements Serializable{
 	private double low;
 	private double close;
 	private double dif;
-	private double dea;
-	private double macd;
+	private double dea;//黄线
+	private double macd;//柱子
 	private double shortEma;
 	private double midEma;
 	private double longEma;

@@ -6,6 +6,7 @@ import org.springframework.context.annotation.Configuration;
 
 import com.example.future.macd.DataHandle2;
 import com.example.future.macd.DataHandle3;
+import com.example.future.macd.DataHandleAll;
 
 @Configuration
 public class BeanConfig {
@@ -21,6 +22,11 @@ public class BeanConfig {
 	@Bean
 	public DataHandle3 dataHandle3() {
 		return new DataHandle3(config);
+	}
+	
+	@Bean
+	public DataHandleAll dataHandleAll() {
+		return new DataHandleAll(config);
 	}
 
 }
