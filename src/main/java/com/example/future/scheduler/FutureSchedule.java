@@ -53,36 +53,36 @@ public class FutureSchedule {
 	
 	
 //	@Scheduled(cron="01 12 18 * * ?")
-//	@Scheduled(cron="01 24 10 * * ?")
+//	@Scheduled(cron="01 09 15 * * ?")
     public void test(){
 
 		LOGGER.info("执行任务：" + new Date());
 		
-		printDate();
+		dayMacdAlert();
 		
-		if(map.size() == 0) {
-			for(String name:config.getAlertNameList()) {
-				map.put(name.split("_")[0], name.split("_")[1]);
-			}
-		}
-		
-		ArrayList<String> list = futureService.futureAlertMain();
-		
-		for(int i=0;i<list.size();i++) {
-			if(map.get(list.get(i)) != null) {
-				list.set(i, map.get(list.get(i)) + "(" + list.get(i) + ")");
-			}
-		}
-		
-//        String url = null;
-		try {
-			mailService.sendMail(list.toString());
-			
-			LOGGER.info(list.toString());
-//			url = "http://localhost:8761/sendMail?content="+URLEncoder.encode(list.toString(),"UTF-8");
-		} catch (Exception e) {
-			LOGGER.error(e.getMessage(),e);
-		}
+//		if(map.size() == 0) {
+//			for(String name:config.getAlertNameList()) {
+//				map.put(name.split("_")[0], name.split("_")[1]);
+//			}
+//		}
+//		
+//		ArrayList<String> list = futureService.futureAlertMain();
+//		
+//		for(int i=0;i<list.size();i++) {
+//			if(map.get(list.get(i)) != null) {
+//				list.set(i, map.get(list.get(i)) + "(" + list.get(i) + ")");
+//			}
+//		}
+//		
+////        String url = null;
+//		try {
+//			mailService.sendMail(list.toString());
+//			
+//			LOGGER.info(list.toString());
+////			url = "http://localhost:8761/sendMail?content="+URLEncoder.encode(list.toString(),"UTF-8");
+//		} catch (Exception e) {
+//			LOGGER.error(e.getMessage(),e);
+//		}
 
     }
 	
@@ -90,7 +90,7 @@ public class FutureSchedule {
 			
     @Scheduled(cron="0 30,40,50 14 ? * MON-FRI")
 	//@Scheduled(cron="0 30,40,50 14 * * ?")
-    public void printDate(){
+    public void dayMacdAlert(){
 		
 		LOGGER.info("执行任务：" + new Date());
 		
