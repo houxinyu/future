@@ -151,7 +151,7 @@ public class FutureSchedule {
     }
     
     //60分钟预警
-    @Scheduled(cron="0 58 9,10,14,21,22,23 ? * MON-FRI")
+    @Scheduled(cron="0 58 9,10,14,21,22 ? * MON-FRI")
     public void alertFor60(){
     	alert(60);
     }
@@ -191,7 +191,7 @@ public class FutureSchedule {
 				if(config.isSendDingtalk()) {
 //					DingDingMessageUtil.sendTextMessage(list.toString().replaceAll(",", "\n\n"), config.getAccessToken());
 //					Thread.sleep(1000);
-					DingDingMessageUtil.sendTextMessage(alertList.toString().replaceAll(",", "\n\n"), config.getAccessToken());
+					DingDingMessageUtil.sendTextMessage(min + "预警:\n\n" + alertList.toString().replaceAll(",", "\n\n"), config.getAccessToken());
 				}
 			}
 			LOGGER.info(">>>>>>>>>>>>>>" + alertList.toString());
