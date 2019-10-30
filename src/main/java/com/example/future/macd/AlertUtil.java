@@ -325,6 +325,7 @@ public class AlertUtil {
 		String url = "http://stock2.finance.sina.com.cn/futures/api/json.php/IndexService.getInnerFuturesMiniKLine"+min+"m?symbol="+code;
 		if(min==3600){
 			url="http://stock2.finance.sina.com.cn/futures/api/json.php/IndexService.getInnerFuturesDailyKLine?symbol="+code;
+			//时间，开盘，最高，最低，收盘，成交量
 			//[["2018-11-27","5828.000","5830.000","5382.000","5382.000","471124"],["2018-11-28","5300.000","5314.000","5142.000","5184.000","1027200"]]
 			//[["2018-11-27","5828.000","5830.000","5382.000","5382.000","471124"],["2018-11-28","5300.000","5314.000","5142.000","5184.000","1027200"]]
 		}

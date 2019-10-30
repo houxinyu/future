@@ -150,6 +150,7 @@ public class FutureSchedule {
     	alert(30);
     }
     
+    
     //60分钟预警
     @Scheduled(cron="0 58 9,10,14,21,22 ? * MON-FRI")
     public void alertFor60(){

@@ -57,6 +57,10 @@ public class DingDingMessageUtil {
 	   public static void sendTextMessage(String msg) {
 		   sendTextMessage(msg, null);
 	   }
+	   
+	   public static void main(String[] args) {
+		 DingDingMessageUtil.sendTextMessage("test", "f0d33c246bba924fcd6ddc17f2c13b4dba43f83e52a9e7acacebbd08d7474a94");
+	}
 	}
 
 	class Message {
@@ -94,4 +98,6 @@ public class DingDingMessageUtil {
 	   public void setContent(String content) {
 	      this.content = content;
 	   }
+	   
+
 	}
