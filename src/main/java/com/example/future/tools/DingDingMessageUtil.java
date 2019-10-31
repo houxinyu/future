@@ -59,7 +59,7 @@ public class DingDingMessageUtil {
 	   }
 	   
 	   public static void main(String[] args) {
-		 DingDingMessageUtil.sendTextMessage("test", "f0d33c246bba924fcd6ddc17f2c13b4dba43f83e52a9e7acacebbd08d7474a94");
+		 DingDingMessageUtil.sendTextMessage("这个平台测试", "f0d33c246bba924fcd6ddc17f2c13b4dba43f83e52a9e7acacebbd08d7474a94");
 	}
 	}
 

@@ -3,17 +3,16 @@ package com.example.future.macd;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 import com.example.future.config.FutureConfig;
 import com.example.future.tools.时间工具;
-import com.example.future.tools.配置文件;
 
 /**
  * 实时行情信息抓取类
@@ -22,316 +21,321 @@ import com.example.future.tools.配置文件;
  * @version 1.0 create at 2012-5-8
  */
 
-//@Component
+// @Component
 public class DataHandleAll {
 	private static final Logger LOGGER = LoggerFactory.getLogger(DataHandleAll.class);
-	
 
 	private FutureConfig config;
-	
+
 	public DataHandleAll(FutureConfig config) {
 		this.config = config;
 	}
-	
-//	public static ArrayList<String> futureAlertMain(){
-//		DataHandle2 dataHandle2 = new DataHandle2();
-//		dataHandle2.clearHistoryData();
-//		dataHandle2.loadHistoryData();
-//		dataHandle2.loadTodayKEntity();
-//		dataHandle2.caculateMACD();
-//		return dataHandle2.caculateAlert();
-//		
-//	}
-	
 
-	public  void clearHistoryData() {
+	// public static ArrayList<String> futureAlertMain(){
+	// DataHandle2 dataHandle2 = new DataHandle2();
+	// dataHandle2.clearHistoryData();
+	// dataHandle2.loadHistoryData();
+	// dataHandle2.loadTodayKEntity();
+	// dataHandle2.caculateMACD();
+	// return dataHandle2.caculateAlert();
+	//
+	// }
+
+	public void clearHistoryData() {
 		AlertUtil.getKentityListMap().clear();
 	}
-	
-	
-	public  void loadHistoryData(int min){
+
+	public void loadHistoryData(int min) {
 		LOGGER.info("加载历史K线数据...");
-		long start= System.currentTimeMillis();
+		long start = System.currentTimeMillis();
 		List<String> alertNameList = config.getAlertList();
-		
-		List<String> alertList =new ArrayList<>();
-		for(String code:alertNameList) {
-			if("BU0,MA0,RU0,TA0,HC0,RB0,I0,FG0,JM0,J0,ZC0,RM0,M0,A0,P0,Y0,OI0,CF0,SR0,C0,CS0,JD0,PP0,L0,V0,EG0,AP0,SF0,SM0,SP0".indexOf(code) == -1) {
+
+		List<String> alertList = new ArrayList<>();
+		for (String code : alertNameList) {
+			if ("BU0,MA0,RU0,TA0,HC0,RB0,I0,FG0,JM0,J0,ZC0,RM0,M0,A0,P0,Y0,OI0,CF0,SR0,C0,CS0,JD0,PP0,L0,V0,EG0,AP0,SF0,SM0,SP0"
+					.indexOf(code) == -1) {
 				alertList.add(code);
 			}
 		}
-		
+
 		LOGGER.info("alertList:" + alertList);
-		
-		ArrayList<KEntity> list=new ArrayList<KEntity>();
-		for(String urlCodeName: alertList) {
-			list=loadHisMinData(urlCodeName,min);
-			LOGGER.info((urlCodeName+"5")+"历史数据 size:" + list.size());
-			if(list.size()>0){
-				AlertUtil.putListToMap(list.get(0).getName()+list.get(0).getMin(), delSubList(list,240));
+
+		ArrayList<KEntity> list = new ArrayList<KEntity>();
+		for (String urlCodeName : alertList) {
+			list = loadHisMinData(urlCodeName, min);
+			LOGGER.info((urlCodeName + "5") + "历史数据 size:" + list.size());
+			if (list.size() > 0) {
+				AlertUtil.putListToMap(list.get(0).getName() + list.get(0).getMin(), delSubList(list, 240));
 			}
-			LOGGER.info(list.get(0).getName()+list.get(0).getMin()+"历史数据：" + list.size());
+			LOGGER.info(list.get(0).getName() + list.get(0).getMin() + "历史数据：" + list.size());
 
 		}
-		long end= System.currentTimeMillis();
-		LOGGER.info("加载历史K线数据完毕。耗时："+(start-end)/1000+"秒");
+		long end = System.currentTimeMillis();
+		LOGGER.info("加载历史K线数据完毕。耗时：" + (start - end) / 1000 + "秒");
 	}
-	
-	public  void loadTodayKEntity(){
+
+	public void loadTodayKEntity() {
 		LOGGER.info("加载今日K线数据...");
-		long start= System.currentTimeMillis();
+		long start = System.currentTimeMillis();
 		List<String> alertList = config.getAlertList();
 		LOGGER.info("alertList:" + alertList);
 
-		ArrayList<KEntity> list=new ArrayList<KEntity>();
-		for(String urlCodeName:alertList) {
-			list=loadHisMinData(urlCodeName,5);
-			if(list.size()>0){
-				AlertUtil.putListToMap(list.get(0).getName()+list.get(0).getMin(), delSubList(list,240));
+		ArrayList<KEntity> list = new ArrayList<KEntity>();
+		for (String urlCodeName : alertList) {
+			list = loadHisMinData(urlCodeName, 5);
+			if (list.size() > 0) {
+				AlertUtil.putListToMap(list.get(0).getName() + list.get(0).getMin(), delSubList(list, 240));
 			}
 		}
-		long end= System.currentTimeMillis();
-		LOGGER.info("加载今日K线数据完毕。耗时：" + (start - end)/1000+"秒");
+		long end = System.currentTimeMillis();
+		LOGGER.info("加载今日K线数据完毕。耗时：" + (start - end) / 1000 + "秒");
 	}
-	
-	//一次请求所有
-	public  void loadTodayKEntityList(){
+
+	// 一次请求所有
+	public void loadTodayKEntityList() {
 		LOGGER.info("加载今日K线数据...");
-		long start= System.currentTimeMillis();
+		long start = System.currentTimeMillis();
 		List<String> alertList = config.getAlertList();
 		LOGGER.info("alertList:" + alertList);
-		
-//		String[] crawlList = AlertUtil.抓新浪取历史数据("BU0,MA0,RU0,TA0,HC0,RB0,I0,FG0,JM0,J0,ZC0,RM0,M0,A0,P0,Y0,OI0,CF0,SR0,C0,CS0,JD0,PP0,L0,V0,EG0,AP0,SF0,SM0,SP0", 0).replaceAll("var hq_str_", "").split(";");
-//
-//		ArrayList<KEntity> list=new ArrayList<KEntity>();
-//		for(String urlCodeName:alertList) {
-//			list=loadHisMinData(urlCodeName,0);
-//			if(list.size()>0){
-//				AlertUtil.putListToMap(list.get(0).getName()+list.get(0).getMin(), delSubList(list,240));
-//			}
-//		}
-//		long end= System.currentTimeMillis();
-//		LOGGER.info("加载今日K线数据完毕。耗时：" + (start - end)/1000+"秒");
+
+		// String[] crawlList =
+		// AlertUtil.抓新浪取历史数据("BU0,MA0,RU0,TA0,HC0,RB0,I0,FG0,JM0,J0,ZC0,RM0,M0,A0,P0,Y0,OI0,CF0,SR0,C0,CS0,JD0,PP0,L0,V0,EG0,AP0,SF0,SM0,SP0",
+		// 0).replaceAll("var hq_str_", "").split(";");
+		//
+		// ArrayList<KEntity> list=new ArrayList<KEntity>();
+		// for(String urlCodeName:alertList) {
+		// list=loadHisMinData(urlCodeName,0);
+		// if(list.size()>0){
+		// AlertUtil.putListToMap(list.get(0).getName()+list.get(0).getMin(),
+		// delSubList(list,240));
+		// }
+		// }
+		// long end= System.currentTimeMillis();
+		// LOGGER.info("加载今日K线数据完毕。耗时：" + (start - end)/1000+"秒");
 	}
 
-
-	public  void caculateMACD(int min) {
-//		String[] alertList=配置文件.获取配置项("alertList").split(",");
+	public void caculateMACD(int min) {
+		// String[] alertList=配置文件.获取配置项("alertList").split(",");
 		List<String> alertList = config.getAlertList();
-		for(String urlCode:alertList){
+		for (String urlCode : alertList) {
 			ArrayList<KEntity> list = AlertUtil.getListFromMap(urlCode + min);
-			if(list != null && list.size() != 0) {
+			if (list != null && list.size() != 0) {
 				MyMA.setMA(list, 20);
 				MyMACD.setMACD(list);
 			}
 		}
 	}
-	
-	public  ArrayList<String> caculateAlert() {
-//		String[] alertList=配置文件.获取配置项("alertList").split(",");
+
+	public ArrayList<String> caculateAlert() {
+		// String[] alertList=配置文件.获取配置项("alertList").split(",");
 		ArrayList<String> alertCodeList = new ArrayList<>();
 		List<String> alertList = config.getAlertList();
-		for(String urlCode:alertList){
+		for (String urlCode : alertList) {
 			ArrayList<KEntity> list = AlertUtil.getListFromMap(urlCode + 5);
-			if(list == null || list.size() == 0) {
+			if (list == null || list.size() == 0) {
 				LOGGER.warn(urlCode + "数据不存在！");
-				//发送邮件
-			}else {
-				KEntity todayEntity = list.get(list.size()-1);
-				KEntity preEntity = list.get(list.size()-2);
-				KEntity ppEntity = list.get(list.size()-3);
+				// 发送邮件
+			} else {
+				KEntity todayEntity = list.get(list.size() - 1);
+				KEntity preEntity = list.get(list.size() - 2);
+				KEntity ppEntity = list.get(list.size() - 3);
 				//
-				boolean 绿转 = preEntity.getDea() > 0 && preEntity.getMacd() < ppEntity.getMacd() && preEntity.getMacd() < todayEntity.getMacd() && todayEntity.getMacd() < 0 && todayEntity.getClose() > todayEntity.getMA20();
-				boolean 红转 = preEntity.getDea() < 0 && preEntity.getMacd() > ppEntity.getMacd() && preEntity.getMacd() > todayEntity.getMacd() && todayEntity.getMacd() > 0 && todayEntity.getClose() < todayEntity.getMA20();
-				
-				if(绿转 || 红转) {
+				boolean 绿转 = preEntity.getDea() > 0 && preEntity.getMacd() < ppEntity.getMacd()
+						&& preEntity.getMacd() < todayEntity.getMacd() && todayEntity.getMacd() < 0
+						&& todayEntity.getClose() > todayEntity.getMA20();
+				boolean 红转 = preEntity.getDea() < 0 && preEntity.getMacd() > ppEntity.getMacd()
+						&& preEntity.getMacd() > todayEntity.getMacd() && todayEntity.getMacd() > 0
+						&& todayEntity.getClose() < todayEntity.getMA20();
+
+				if (绿转 || 红转) {
 					LOGGER.info("======================================================================");
-					
-					LOGGER.info("品种:" + urlCode + " 出现转折:" + (绿转?"绿转":"红转"));
-					
-					LOGGER.info("todayEntity.Dea：" + todayEntity.getDea() + ",ppEntity.macd：" + ppEntity.getMacd() + "," +  "preEntity.macd:" + preEntity.getMacd()+ ",todayEntity.macd:" + todayEntity.getMacd()+ ",todayEntity.close:" + todayEntity.getClose()+ ",todayEntity.ma20:" + todayEntity.getMA20());
-					
-					
+
+					LOGGER.info("品种:" + urlCode + " 出现转折:" + (绿转 ? "绿转" : "红转"));
+
+					LOGGER.info("todayEntity.Dea：" + todayEntity.getDea() + ",ppEntity.macd：" + ppEntity.getMacd() + ","
+							+ "preEntity.macd:" + preEntity.getMacd() + ",todayEntity.macd:" + todayEntity.getMacd()
+							+ ",todayEntity.close:" + todayEntity.getClose() + ",todayEntity.ma20:"
+							+ todayEntity.getMA20());
+
 					alertCodeList.add(urlCode);
-					
+
 					LOGGER.info("======================================================================");
 				}
 
 			}
 		}
-		
+
 		LOGGER.info("alertCodeList size:" + alertCodeList.size());
-		
+
 		return alertCodeList;
 	}
-	
-	public  ArrayList<String> caculateAlert(int min) {
-//		String[] alertList=配置文件.获取配置项("alertList").split(",");
+
+	public ArrayList<String> caculateAlert(int min) {
+		// String[] alertList=配置文件.获取配置项("alertList").split(",");
 		ArrayList<String> alertCodeList = new ArrayList<>();
 		List<String> alertList = config.getAlertList();
-		for(String urlCode:alertList){
+		for (String urlCode : alertList) {
 			ArrayList<KEntity> list = AlertUtil.getListFromMap(urlCode + min);
-			if(list == null || list.size() == 0) {
+			if (list == null || list.size() == 0) {
 				LOGGER.warn(urlCode + "数据不存在！");
-				//发送邮件
-			}else {
-				KEntity todayEntity = list.get(list.size()-1);
-				KEntity preEntity = list.get(list.size()-2);
-				KEntity ppEntity = list.get(list.size()-3);
+				// 发送邮件
+			} else {
+				KEntity todayEntity = list.get(list.size() - 1);
+				KEntity preEntity = list.get(list.size() - 2);
+				KEntity ppEntity = list.get(list.size() - 3);
 				//
-				boolean 绿转 = preEntity.getDea() > 0 && preEntity.getMacd() < ppEntity.getMacd() && preEntity.getMacd() < todayEntity.getMacd() && todayEntity.getMacd() < 0;
-				boolean 红转 = preEntity.getDea() < 0 && preEntity.getMacd() > ppEntity.getMacd() && preEntity.getMacd() > todayEntity.getMacd() && todayEntity.getMacd() > 0;
-				
-				if(绿转 || 红转) {
+				boolean 绿转 = preEntity.getDea() > 0 && preEntity.getMacd() < ppEntity.getMacd()
+						&& preEntity.getMacd() < todayEntity.getMacd() && todayEntity.getMacd() < 0;
+				boolean 红转 = preEntity.getDea() < 0 && preEntity.getMacd() > ppEntity.getMacd()
+						&& preEntity.getMacd() > todayEntity.getMacd() && todayEntity.getMacd() > 0;
+
+				if (绿转 || 红转) {
 					LOGGER.info("======================================================================");
-					
-					LOGGER.info("品种:" + urlCode + " 出现转折:" + (绿转?"绿转":"") + "," +  (红转?"红转":""));
-					
-					LOGGER.info( "黄线Dea:" + todayEntity.getDea() + ", 柱子（前，昨，今）：" + ppEntity.getMacd() + "," + preEntity.getTime() + ":" + preEntity.getMacd()+ "," + todayEntity.getMacd());
-					
-					
+
+					LOGGER.info("品种:" + urlCode + " 出现转折:" + (绿转 ? "绿转" : "") + "," + (红转 ? "红转" : ""));
+
+					LOGGER.info("黄线Dea:" + todayEntity.getDea() + ", 柱子（前，昨，今）：" + ppEntity.getMacd() + ","
+							+ preEntity.getTime() + ":" + preEntity.getMacd() + "," + todayEntity.getMacd());
+
 					alertCodeList.add(urlCode);
-					
+
 					LOGGER.info("======================================================================");
 				}
 
 			}
 		}
-		
+
 		LOGGER.info("alertCodeList size:" + alertCodeList.size());
-		
+
 		return alertCodeList;
 	}
 
-	private static ArrayList<KEntity> getDayList(String codeName,int code0){
-		ArrayList<KEntity> dayList=new ArrayList<KEntity>();
+	private static ArrayList<KEntity> getDayList(String codeName, int code0) {
+		ArrayList<KEntity> dayList = new ArrayList<KEntity>();
 		try {
-			String UrlCodeName=AlertUtil.getUrlCodeName(codeName);
-			if(code0==0){
-				UrlCodeName=AlertUtil.获得主力合约代码(codeName);
+			String UrlCodeName = AlertUtil.getUrlCodeName(codeName);
+			if (code0 == 0) {
+				UrlCodeName = AlertUtil.获得主力合约代码(codeName);
 			}
-			String[] data = AlertUtil.抓新浪取历史数据(UrlCodeName, 3600).replace("\"", "").replace("[","").split(";");																	
-			for (int k = 0; k <=data.length-1; k++) {
-				int r=loadHisData(data[k],codeName,3600,dayList);
-				if(r==0){//无效数据
+			String[] data = AlertUtil.抓新浪取历史数据(UrlCodeName, 3600).replace("\"", "").replace("[", "").split(";");
+			for (int k = 0; k <= data.length - 1; k++) {
+				int r = loadHisData(data[k], codeName, 3600, dayList);
+				if (r == 0) {// 无效数据
 					break;
 				}
 			}
 		} catch (Exception e) {
 			// TODO: handle exception
-			LOGGER.error(e.getMessage(),e);
+			LOGGER.error(e.getMessage(), e);
 		}
 
 		return dayList;
 	}
 
-
-	public static ArrayList<KEntity> delSubList(ArrayList<KEntity> list,int size){
-		ArrayList<KEntity> listNew=new ArrayList<KEntity>();
-		if(list.size()>size){
-			for(int i=list.size()-size;i<list.size();i++){
-				KEntity tempEntity=list.get(i);
-				tempEntity.setPreIndex(listNew.size()-1);
+	public static ArrayList<KEntity> delSubList(ArrayList<KEntity> list, int size) {
+		ArrayList<KEntity> listNew = new ArrayList<KEntity>();
+		if (list.size() > size) {
+			for (int i = list.size() - size; i < list.size(); i++) {
+				KEntity tempEntity = list.get(i);
+				tempEntity.setPreIndex(listNew.size() - 1);
 				listNew.add(tempEntity);
 			}
-		}else{
-			for(int i=0;i<list.size();i++){
-				KEntity tempEntity=list.get(i);
-				tempEntity.setPreIndex(listNew.size()-1);
+		} else {
+			for (int i = 0; i < list.size(); i++) {
+				KEntity tempEntity = list.get(i);
+				tempEntity.setPreIndex(listNew.size() - 1);
 				listNew.add(tempEntity);
 			}
 		}
 		return listNew;
 	}
-	
+
 	/**
 	 * 
 	 * @param urlCodeName
-	 * @param min 3600代表历史日线，0代表当天日线
+	 * @param min
+	 *            3600代表历史日线，0代表当天日线
 	 * @return
 	 */
-	public static ArrayList<KEntity> loadHisMinData(String urlCodeName,int min){
-		ArrayList<KEntity> list=new ArrayList<KEntity>();
-//		String codeName=AlertUtil.getCodeName(urlCodeName);
-		if(min != 0){//处理历史日线数据
-			String[] data = AlertUtil.抓新浪取历史数据(urlCodeName, min).replace("\"", "").replace("[",
-			"").split(";");
-			//日线和其他时间顺序不一样
-			if(min == 3600) {
-				for (int i = 0; i <=data.length-1; i++) {
-					int r=loadHisData(data[i],urlCodeName,min,list);
-					if(r==0){//无效数据
+	public static ArrayList<KEntity> loadHisMinData(String urlCodeName, int min) {
+		ArrayList<KEntity> list = new ArrayList<KEntity>();
+		// String codeName=AlertUtil.getCodeName(urlCodeName);
+		if (min != 0) {// 处理历史日线数据
+			String[] data = AlertUtil.抓新浪取历史数据(urlCodeName, min).replace("\"", "").replace("[", "").split(";");
+			// 日线和其他时间顺序不一样
+			if (min == 3600) {
+				for (int i = 0; i <= data.length - 1; i++) {
+					int r = loadHisData(data[i], urlCodeName, min, list);
+					if (r == 0) {// 无效数据
 						break;
 					}
 				}
-			}else {
-				for (int i = data.length-1; i>=0; i--) {
-					int r=loadHisData(data[i],urlCodeName,min,list);
-					if(r==0){//无效数据
+			} else {
+				for (int i = data.length - 1; i >= 0; i--) {
+					int r = loadHisData(data[i], urlCodeName, min, list);
+					if (r == 0) {// 无效数据
 						break;
 					}
 				}
 			}
-			
 
-		}else{//处理当天日线数据
-			//varhq_str_M0="豆粕连续,145958,开盘价[index=2],最高价[index=3],最低价[index=4],3178,3153,最新价[index=7],3154,3162,3169,1325,223,1371608,成交量[index=14],连,豆粕,2013-06-28[index=17]";
-			
-			list = AlertUtil.getListFromMap(urlCodeName+3600);
-			
-			LOGGER.info((urlCodeName+"3600") + "历史数据：" + (null == list));
-			
+		} else {// 处理当天日线数据
+				// varhq_str_M0="豆粕连续,145958,开盘价[index=2],最高价[index=3],最低价[index=4],3178,3153,最新价[index=7],3154,3162,3169,1325,223,1371608,成交量[index=14],连,豆粕,2013-06-28[index=17]";
+
+			list = AlertUtil.getListFromMap(urlCodeName + 3600);
+
+			LOGGER.info((urlCodeName + "3600") + "历史数据：" + (null == list));
+
 			LOGGER.info("历史数据：" + list.size());
 			LOGGER.info("今日数据:" + AlertUtil.抓新浪取历史数据(urlCodeName, min));
-			
-			String[] data = AlertUtil.抓新浪取历史数据(urlCodeName, min).replace("\"",
-			"").split(",");
-			
+
+			String[] data = AlertUtil.抓新浪取历史数据(urlCodeName, min).replace("\"", "").split(",");
+
 			KEntity todayEntity = new KEntity();
 			todayEntity.setTime(data[17]);
 			todayEntity.setOpen(Double.parseDouble(data[2]));
 			todayEntity.setHigh(Double.parseDouble(data[3]));
 			todayEntity.setLow(Double.parseDouble(data[4]));
 			todayEntity.setClose(Double.parseDouble(data[7]));
-			
+
 			list.add(todayEntity);
 
 		}
 		return list;
 
 	}
-	
-	//因为新浪历史数据接口，日线数据和其他时间框架数据的前后顺序不一样，所以遍历一个从前到后
-	private static int loadHisData(String data,String name,int min,ArrayList<KEntity> list){
-		
+
+	// 因为新浪历史数据接口，日线数据和其他时间框架数据的前后顺序不一样，所以遍历一个从前到后
+	private static int loadHisDataBack(String data, String name, int min, ArrayList<KEntity> list) {
+
 		String[] infos = data.split(",");
-		if(infos[0].length()<11){
-			infos[0]=infos[0]+" 00:00:00";
+		if (infos[0].length() < 11) {
+			infos[0] = infos[0] + " 00:00:00";
 		}
-		//如果现在是15:00-00:00，则取日期为今天且时间为15:00:00之前的数据
-		//如果现在是00:00-15:00，则取日期为前一天，且时间为15:00之前的数据
-		int hour=时间工具.获得现在小时();
-		String stopTime=时间工具.获得今日日期()+" 15:00:00";
-		if(hour<15){
-			stopTime=时间工具.取得前一交易日期()+" 15:00:00";
-		}else{
-			stopTime=时间工具.获得今日日期()+" 15:00:00";
+		// 如果现在是15:00-00:00，则取日期为今天且时间为15:00:00之前的数据
+		// 如果现在是00:00-15:00，则取日期为前一天，且时间为15:00之前的数据
+		int hour = 时间工具.获得现在小时();
+		String stopTime = 时间工具.获得今日日期() + " 15:00:00";
+		if (hour < 15) {
+			stopTime = 时间工具.取得前一交易日期() + " 15:00:00";
+		} else {
+			stopTime = 时间工具.获得今日日期() + " 15:00:00";
 		}
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");     
-        try {
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		try {
 			Date skipTime = sdf.parse(stopTime);
-//			System.out.println("￥￥￥￥￥："+infos[0]);
+			// System.out.println("￥￥￥￥￥："+infos[0]);
 			Date dataTime = sdf.parse(infos[0]);
-//			System.out.println(stopTime+" "+infos[0]);
-			if(dataTime.getTime()>skipTime.getTime()){
-				//break;
-				//return 0;
+			// System.out.println(stopTime+" "+infos[0]);
+			if (dataTime.getTime() > skipTime.getTime()) {
+				// break;
+				// return 0;
 			}
 		} catch (ParseException e) {
 			// TODO Auto-generated catch block
 			LOGGER.error(e.getMessage(), e);
 		}
-		String tp=getTpFromName(name);
+		String tp = getTpFromName(name);
 		KEntity kEntity = new KEntity();
 		kEntity.setTP(tp);
 		kEntity.setName(name);
@@ -341,104 +345,788 @@ public class DataHandleAll {
 		kEntity.setHigh(Double.parseDouble(infos[2]));
 		kEntity.setLow(Double.parseDouble(infos[3]));
 		kEntity.setClose(Double.parseDouble(infos[4]));
-		kEntity.setPreIndex(list.size()-1);
-		list.add(kEntity);
+		kEntity.setPreIndex(list.size() - 1);
+
+		if (min == 15 && infos[0].contains("10:30:00")) {
+			// 把10:30:00这根K线去掉
+		} else {
+			list.add(kEntity);
+		}
+
 		return 1;
 	}
-	
-	
-	public static ArrayList<KEntity> lineListToEnityList(ArrayList<String> list){
-		ArrayList<KEntity> entityList=new ArrayList<KEntity>();
-		if(list.size()==1){
+
+	public static ArrayList<KEntity> lineListToEnityList(ArrayList<String> list) {
+		ArrayList<KEntity> entityList = new ArrayList<KEntity>();
+		if (list.size() == 1) {
 			entityList.add(lineToEntity(list.get(0)));
 		}
-		if(list.size()>1){
-			for(int i=0;i<list.size();i++){
-				KEntity kEntity=lineToEntity(list.get(i));
-				for(i=i+1;i<list.size();i++){
-					KEntity nextEntity=lineToEntity(list.get(i));
-					if(kEntity.getTime().substring(0, 16).equals(nextEntity.getTime().substring(0, 16))){
+		if (list.size() > 1) {
+			for (int i = 0; i < list.size(); i++) {
+				KEntity kEntity = lineToEntity(list.get(i));
+				for (i = i + 1; i < list.size(); i++) {
+					KEntity nextEntity = lineToEntity(list.get(i));
+					if (kEntity.getTime().substring(0, 16).equals(nextEntity.getTime().substring(0, 16))) {
 						kEntity.setClose(nextEntity.getClose());
-						if(kEntity.getHigh()<nextEntity.getHigh()){
+						if (kEntity.getHigh() < nextEntity.getHigh()) {
 							kEntity.setHigh(nextEntity.getHigh());
 						}
-						if(kEntity.getLow()>nextEntity.getLow()){
+						if (kEntity.getLow() > nextEntity.getLow()) {
 							kEntity.setLow(nextEntity.getLow());
 						}
-						if(i==list.size()-1){
+						if (i == list.size() - 1) {
 							entityList.add(kEntity);
 						}
-						
-					}else{
+
+					} else {
 						entityList.add(kEntity);
-						kEntity=nextEntity;
+						kEntity = nextEntity;
 					}
 				}
 			}
 
 		}
-		
+
 		return entityList;
 	}
-	
-	private static KEntity lineToEntity(String line){
-		KEntity kEntity=new KEntity();
-    	String[] lineInfos=line.split(",");
+
+	private static KEntity lineToEntity(String line) {
+		KEntity kEntity = new KEntity();
+		String[] lineInfos = line.split(",");
 		kEntity.setTP(lineInfos[0]);
 		kEntity.setName(lineInfos[1]);
 		kEntity.setTime(lineInfos[2].substring(0, 19));
-		kEntity.setMin(1);//1分钟K线
+		kEntity.setMin(1);// 1分钟K线
 		kEntity.setClose(Double.parseDouble(lineInfos[3]));
 		kEntity.setOpen(Double.parseDouble(lineInfos[3]));
 		kEntity.setHigh(Double.parseDouble(lineInfos[3]));
 		kEntity.setLow(Double.parseDouble(lineInfos[3]));
 		return kEntity;
 	}
-	
 
-	
-	
-	public static String getTpFromName(String name){
-    	//RM1701,MA1701,ZC1701,CF1701,FG1701,TA1701,SR1701,OI1701,rb1701,ru1701,bu1612,ag1612,au1612,ni1701,hc1701,m1701,c1701,p1701,i1701,l1701,y1701,j1701,pp1701,jm1701,jd1701,cs1701,a1701
+	public static String getTpFromName(String name) {
+		// RM1701,MA1701,ZC1701,CF1701,FG1701,TA1701,SR1701,OI1701,rb1701,ru1701,bu1612,ag1612,au1612,ni1701,hc1701,m1701,c1701,p1701,i1701,l1701,y1701,j1701,pp1701,jm1701,jd1701,cs1701,a1701
 
-		String tp="dc";
-    	if("rb,ru,bu,ag,au,ni,hc,al,cu,sn,zn".indexOf(name.substring(0, 2))!=-1){
-    		tp="sc";
-    	}else if("RM1701,MA1701,ZC1701,CF1701,FG1701,TA1701,SR1701,OI1701".indexOf(name.substring(0, 2))!=-1){
-    		tp="zc";
-    	}
-    	return tp;
+		String tp = "dc";
+		if ("rb,ru,bu,ag,au,ni,hc,al,cu,sn,zn".indexOf(name.substring(0, 2)) != -1) {
+			tp = "sc";
+		} else if ("RM1701,MA1701,ZC1701,CF1701,FG1701,TA1701,SR1701,OI1701".indexOf(name.substring(0, 2)) != -1) {
+			tp = "zc";
+		}
+		return tp;
 	}
 	
-
 	
-	public static void main(String[] args){
+	
+	/**到晚上23:00的有6根
+14:15:00[14:15:00,14:30:00,14:45:00,15:00:00]
+
+11:15:00[11:15:00,11:30:00,13:45:00,14:00:00]
+
+10:00:00[10:15:00,10:30:00,10:45:00,11:00:00]
+
+09:00:00[09:15:00,09:30:00,09:45:00,10:00:00]
+
+22:00:00[22:15:00,22:30:00,22:45:0023:00:00]
+
+21:00:00[21:15:00,21:30:00,21:45:00,22:00:00]
+	 * @param args
+	 */
+	
+	/**到晚上23:30分的，有7根，对于这种情况还需要考虑周五没有交易的情况
+14:45:00[14:45:00,15:00:00]
+
+13:45:00[13:45:00,14:00:00,14:15:00,14:30:00]
+
+10:45:00[10:45:00,11:00:00,11:15:00,11:30:00]
+
+09:30:00[09:45:00,10:00:00,10:15:00,10:30:00]
+
+23:00:00[23:15:00,23:30:00,09:15:00,09:30:00]
+
+22:00:00[22:15:00,22:30:00,22:45:00,23:00:00]
+
+21:00:00[21:15:00,21:30:00,21:45:00,22:00:00]
+	 * @param args
+	 */
+	public static void mainForBu(String[] args) {
+		String bu2006 = "[[\"2019-10-31 11:30:00\",\"2904.000\",\"2906.000\",\"2904.000\",\"2904.000\",\"334\"],[\"2019-10-31 11:15:00\",\"2904.000\",\"2906.000\",\"2904.000\",\"2904.000\",\"280\"],[\"2019-10-31 11:00:00\",\"2904.000\",\"2904.000\",\"2900.000\",\"2902.000\",\"628\"],[\"2019-10-31 10:45:00\",\"2904.000\",\"2908.000\",\"2904.000\",\"2906.000\",\"372\"],[\"2019-10-31 10:15:00\",\"2908.000\",\"2910.000\",\"2904.000\",\"2906.000\",\"382\"],[\"2019-10-31 10:00:00\",\"2906.000\",\"2910.000\",\"2906.000\",\"2908.000\",\"722\"],[\"2019-10-31 09:45:00\",\"2906.000\",\"2906.000\",\"2902.000\",\"2904.000\",\"862\"],[\"2019-10-31 09:30:00\",\"2906.000\",\"2908.000\",\"2902.000\",\"2906.000\",\"592\"],[\"2019-10-31 09:15:00\",\"2904.000\",\"2906.000\",\"2896.000\",\"2906.000\",\"1532\"],[\"2019-10-30 23:15:00\",\"2906.000\",\"2906.000\",\"2906.000\",\"2906.000\",\"12\"],[\"2019-10-30 23:00:00\",\"2904.000\",\"2906.000\",\"2902.000\",\"2902.000\",\"812\"],[\"2019-10-30 22:45:00\",\"2898.000\",\"2906.000\",\"2898.000\",\"2904.000\",\"1936\"],[\"2019-10-30 22:30:00\",\"2910.000\",\"2910.000\",\"2894.000\",\"2902.000\",\"9200\"],[\"2019-10-30 22:15:00\",\"2912.000\",\"2914.000\",\"2910.000\",\"2912.000\",\"1168\"],[\"2019-10-30 22:00:00\",\"2914.000\",\"2916.000\",\"2912.000\",\"2912.000\",\"342\"],[\"2019-10-30 21:45:00\",\"2912.000\",\"2916.000\",\"2912.000\",\"2916.000\",\"418\"],[\"2019-10-30 21:30:00\",\"2912.000\",\"2916.000\",\"2910.000\",\"2910.000\",\"278\"],[\"2019-10-30 21:15:00\",\"2912.000\",\"2916.000\",\"2910.000\",\"2912.000\",\"738\"],[\"2019-10-30 15:00:00\",\"2912.000\",\"2916.000\",\"2912.000\",\"2916.000\",\"1320\"],[\"2019-10-30 14:45:00\",\"2910.000\",\"2914.000\",\"2910.000\",\"2914.000\",\"1354\"],[\"2019-10-30 14:30:00\",\"2908.000\",\"2910.000\",\"2908.000\",\"2908.000\",\"856\"],[\"2019-10-30 14:15:00\",\"2906.000\",\"2910.000\",\"2904.000\",\"2910.000\",\"1090\"],[\"2019-10-30 14:00:00\",\"2914.000\",\"2918.000\",\"2900.000\",\"2904.000\",\"3192\"],[\"2019-10-30 13:45:00\",\"2908.000\",\"2916.000\",\"2908.000\",\"2914.000\",\"2024\"],[\"2019-10-30 11:30:00\",\"2908.000\",\"2910.000\",\"2906.000\",\"2910.000\",\"954\"],[\"2019-10-30 11:15:00\",\"2902.000\",\"2908.000\",\"2902.000\",\"2906.000\",\"1064\"],[\"2019-10-30 11:00:00\",\"2902.000\",\"2904.000\",\"2900.000\",\"2904.000\",\"808\"],[\"2019-10-30 10:45:00\",\"2904.000\",\"2906.000\",\"2900.000\",\"2900.000\",\"1134\"],[\"2019-10-30 10:30:00\",\"2902.000\",\"2902.000\",\"2902.000\",\"2902.000\",\"10\"],[\"2019-10-30 10:15:00\",\"2910.000\",\"2910.000\",\"2898.000\",\"2900.000\",\"5668\"],[\"2019-10-30 10:00:00\",\"2912.000\",\"2914.000\",\"2908.000\",\"2912.000\",\"1050\"],[\"2019-10-30 09:45:00\",\"2914.000\",\"2916.000\",\"2908.000\",\"2908.000\",\"1474\"],[\"2019-10-30 09:30:00\",\"2916.000\",\"2920.000\",\"2914.000\",\"2914.000\",\"1030\"],[\"2019-10-30 09:15:00\",\"2916.000\",\"2918.000\",\"2912.000\",\"2918.000\",\"1252\"],[\"2019-10-29 23:00:00\",\"2916.000\",\"2916.000\",\"2914.000\",\"2916.000\",\"808\"],[\"2019-10-29 22:45:00\",\"2914.000\",\"2916.000\",\"2912.000\",\"2914.000\",\"2358\"],[\"2019-10-29 22:30:00\",\"2922.000\",\"2922.000\",\"2916.000\",\"2916.000\",\"868\"],[\"2019-10-29 22:15:00\",\"2920.000\",\"2924.000\",\"2918.000\",\"2920.000\",\"1184\"],[\"2019-10-29 22:00:00\",\"2918.000\",\"2920.000\",\"2916.000\",\"2918.000\",\"244\"],[\"2019-10-29 21:45:00\",\"2920.000\",\"2922.000\",\"2916.000\",\"2916.000\",\"1042\"],[\"2019-10-29 21:30:00\",\"2916.000\",\"2918.000\",\"2914.000\",\"2918.000\",\"1308\"],[\"2019-10-29 21:15:00\",\"2916.000\",\"2920.000\",\"2914.000\",\"2918.000\",\"3650\"],[\"2019-10-29 15:00:00\",\"2924.000\",\"2926.000\",\"2924.000\",\"2926.000\",\"1992\"],[\"2019-10-29 14:45:00\",\"2916.000\",\"2924.000\",\"2916.000\",\"2922.000\",\"3054\"],[\"2019-10-29 14:30:00\",\"2920.000\",\"2920.000\",\"2916.000\",\"2918.000\",\"1850\"],[\"2019-10-29 14:15:00\",\"2908.000\",\"2918.000\",\"2908.000\",\"2918.000\",\"632\"],[\"2019-10-29 14:00:00\",\"2916.000\",\"2916.000\",\"2906.000\",\"2906.000\",\"3130\"],[\"2019-10-29 13:45:00\",\"2916.000\",\"2920.000\",\"2916.000\",\"2918.000\",\"1318\"],[\"2019-10-29 11:30:00\",\"2914.000\",\"2920.000\",\"2914.000\",\"2918.000\",\"2540\"],[\"2019-10-29 11:15:00\",\"2916.000\",\"2916.000\",\"2912.000\",\"2916.000\",\"1786\"],[\"2019-10-29 11:00:00\",\"2910.000\",\"2916.000\",\"2910.000\",\"2916.000\",\"2394\"],[\"2019-10-29 10:45:00\",\"2902.000\",\"2910.000\",\"2902.000\",\"2908.000\",\"416\"],[\"2019-10-29 10:15:00\",\"2904.000\",\"2906.000\",\"2900.000\",\"2904.000\",\"1028\"],[\"2019-10-29 10:00:00\",\"2916.000\",\"2918.000\",\"2898.000\",\"2902.000\",\"8016\"],[\"2019-10-29 09:45:00\",\"2906.000\",\"2920.000\",\"2902.000\",\"2918.000\",\"4628\"],[\"2019-10-29 09:30:00\",\"2902.000\",\"2908.000\",\"2900.000\",\"2900.000\",\"2832\"],[\"2019-10-29 09:15:00\",\"2898.000\",\"2904.000\",\"2890.000\",\"2904.000\",\"2604\"],[\"2019-10-28 23:00:00\",\"2898.000\",\"2900.000\",\"2888.000\",\"2900.000\",\"3294\"],[\"2019-10-28 22:45:00\",\"2908.000\",\"2908.000\",\"2896.000\",\"2898.000\",\"4518\"],[\"2019-10-28 22:30:00\",\"2918.000\",\"2918.000\",\"2904.000\",\"2904.000\",\"2858\"],[\"2019-10-28 22:15:00\",\"2920.000\",\"2920.000\",\"2916.000\",\"2918.000\",\"702\"],[\"2019-10-28 22:00:00\",\"2916.000\",\"2920.000\",\"2916.000\",\"2920.000\",\"890\"],[\"2019-10-28 21:45:00\",\"2916.000\",\"2922.000\",\"2916.000\",\"2916.000\",\"1872\"],[\"2019-10-28 21:30:00\",\"2916.000\",\"2922.000\",\"2910.000\",\"2920.000\",\"3924\"],[\"2019-10-28 21:15:00\",\"2912.000\",\"2920.000\",\"2912.000\",\"2918.000\",\"1580\"],[\"2019-10-28 15:00:00\",\"2916.000\",\"2916.000\",\"2910.000\",\"2910.000\",\"1078\"],[\"2019-10-28 14:45:00\",\"2918.000\",\"2918.000\",\"2914.000\",\"2914.000\",\"1240\"],[\"2019-10-28 14:30:00\",\"2918.000\",\"2918.000\",\"2914.000\",\"2918.000\",\"456\"],[\"2019-10-28 14:15:00\",\"2916.000\",\"2920.000\",\"2916.000\",\"2918.000\",\"556\"],[\"2019-10-28 14:00:00\",\"2914.000\",\"2918.000\",\"2912.000\",\"2918.000\",\"742\"],[\"2019-10-28 13:45:00\",\"2914.000\",\"2916.000\",\"2910.000\",\"2914.000\",\"1122\"],[\"2019-10-28 11:30:00\",\"2922.000\",\"2924.000\",\"2914.000\",\"2916.000\",\"2054\"],[\"2019-10-28 11:15:00\",\"2918.000\",\"2922.000\",\"2916.000\",\"2920.000\",\"1500\"],[\"2019-10-28 11:00:00\",\"2918.000\",\"2920.000\",\"2916.000\",\"2918.000\",\"292\"],[\"2019-10-28 10:45:00\",\"2920.000\",\"2920.000\",\"2916.000\",\"2918.000\",\"554\"],[\"2019-10-28 10:30:00\",\"2918.000\",\"2918.000\",\"2918.000\",\"2918.000\",\"140\"],[\"2019-10-28 10:15:00\",\"2912.000\",\"2916.000\",\"2912.000\",\"2916.000\",\"1544\"],[\"2019-10-28 10:00:00\",\"2914.000\",\"2920.000\",\"2912.000\",\"2912.000\",\"1892\"],[\"2019-10-28 09:45:00\",\"2912.000\",\"2918.000\",\"2910.000\",\"2916.000\",\"3132\"],[\"2019-10-28 09:30:00\",\"2924.000\",\"2924.000\",\"2912.000\",\"2912.000\",\"2278\"],[\"2019-10-28 09:15:00\",\"2914.000\",\"2926.000\",\"2912.000\",\"2922.000\",\"3980\"],[\"2019-10-25 23:00:00\",\"2904.000\",\"2908.000\",\"2904.000\",\"2904.000\",\"888\"],[\"2019-10-25 22:45:00\",\"2904.000\",\"2906.000\",\"2902.000\",\"2904.000\",\"836\"],[\"2019-10-25 22:30:00\",\"2904.000\",\"2906.000\",\"2902.000\",\"2902.000\",\"326\"],[\"2019-10-25 22:15:00\",\"2900.000\",\"2906.000\",\"2898.000\",\"2904.000\",\"652\"],[\"2019-10-25 22:00:00\",\"2904.000\",\"2904.000\",\"2900.000\",\"2900.000\",\"868\"],[\"2019-10-25 21:45:00\",\"2908.000\",\"2910.000\",\"2904.000\",\"2906.000\",\"468\"],[\"2019-10-25 21:30:00\",\"2906.000\",\"2910.000\",\"2904.000\",\"2906.000\",\"338\"],[\"2019-10-25 21:15:00\",\"2900.000\",\"2910.000\",\"2900.000\",\"2908.000\",\"1514\"],[\"2019-10-25 15:00:00\",\"2906.000\",\"2910.000\",\"2904.000\",\"2904.000\",\"772\"],[\"2019-10-25 14:45:00\",\"2908.000\",\"2908.000\",\"2900.000\",\"2908.000\",\"878\"],[\"2019-10-25 14:30:00\",\"2902.000\",\"2906.000\",\"2902.000\",\"2902.000\",\"1814\"],[\"2019-10-25 14:15:00\",\"2900.000\",\"2902.000\",\"2898.000\",\"2900.000\",\"232\"],[\"2019-10-25 14:00:00\",\"2902.000\",\"2904.000\",\"2900.000\",\"2900.000\",\"840\"],[\"2019-10-25 13:45:00\",\"2898.000\",\"2904.000\",\"2894.000\",\"2902.000\",\"1382\"],[\"2019-10-25 11:30:00\",\"2900.000\",\"2902.000\",\"2894.000\",\"2900.000\",\"1302\"],[\"2019-10-25 11:15:00\",\"2900.000\",\"2902.000\",\"2898.000\",\"2902.000\",\"1016\"],[\"2019-10-25 11:00:00\",\"2898.000\",\"2900.000\",\"2896.000\",\"2900.000\",\"428\"],[\"2019-10-25 10:45:00\",\"2908.000\",\"2908.000\",\"2898.000\",\"2898.000\",\"2860\"],[\"2019-10-25 10:30:00\",\"2908.000\",\"2908.000\",\"2908.000\",\"2908.000\",\"2\"],[\"2019-10-25 10:15:00\",\"2910.000\",\"2910.000\",\"2908.000\",\"2908.000\",\"954\"],[\"2019-10-25 10:00:00\",\"2908.000\",\"2912.000\",\"2904.000\",\"2910.000\",\"1886\"],[\"2019-10-25 09:45:00\",\"2908.000\",\"2910.000\",\"2906.000\",\"2906.000\",\"2122\"],[\"2019-10-25 09:30:00\",\"2908.000\",\"2910.000\",\"2904.000\",\"2908.000\",\"1860\"],[\"2019-10-25 09:15:00\",\"2924.000\",\"2924.000\",\"2910.000\",\"2910.000\",\"2436\"],[\"2019-10-24 23:00:00\",\"2930.000\",\"2930.000\",\"2922.000\",\"2922.000\",\"894\"],[\"2019-10-24 22:45:00\",\"2928.000\",\"2930.000\",\"2926.000\",\"2926.000\",\"714\"],[\"2019-10-24 22:30:00\",\"2924.000\",\"2930.000\",\"2924.000\",\"2930.000\",\"1920\"],[\"2019-10-24 22:15:00\",\"2926.000\",\"2926.000\",\"2922.000\",\"2922.000\",\"2402\"],[\"2019-10-24 22:00:00\",\"2924.000\",\"2926.000\",\"2922.000\",\"2924.000\",\"2452\"],[\"2019-10-24 21:45:00\",\"2922.000\",\"2924.000\",\"2922.000\",\"2924.000\",\"1490\"],[\"2019-10-24 21:30:00\",\"2922.000\",\"2926.000\",\"2918.000\",\"2926.000\",\"4750\"],[\"2019-10-24 21:15:00\",\"2924.000\",\"2928.000\",\"2916.000\",\"2922.000\",\"7830\"],[\"2019-10-24 15:00:00\",\"2902.000\",\"2904.000\",\"2900.000\",\"2904.000\",\"2050\"],[\"2019-10-24 14:45:00\",\"2906.000\",\"2906.000\",\"2902.000\",\"2904.000\",\"1952\"],[\"2019-10-24 14:30:00\",\"2908.000\",\"2908.000\",\"2902.000\",\"2906.000\",\"1014\"],[\"2019-10-24 14:15:00\",\"2918.000\",\"2918.000\",\"2906.000\",\"2906.000\",\"4052\"],[\"2019-10-24 14:00:00\",\"2906.000\",\"2916.000\",\"2902.000\",\"2916.000\",\"5840\"],[\"2019-10-24 13:45:00\",\"2890.000\",\"2906.000\",\"2890.000\",\"2906.000\",\"4610\"],[\"2019-10-24 11:30:00\",\"2894.000\",\"2894.000\",\"2890.000\",\"2892.000\",\"260\"],[\"2019-10-24 11:15:00\",\"2892.000\",\"2894.000\",\"2890.000\",\"2892.000\",\"348\"],[\"2019-10-24 11:00:00\",\"2894.000\",\"2896.000\",\"2890.000\",\"2890.000\",\"702\"],[\"2019-10-24 10:45:00\",\"2896.000\",\"2898.000\",\"2894.000\",\"2894.000\",\"472\"],[\"2019-10-24 10:30:00\",\"2896.000\",\"2896.000\",\"2896.000\",\"2896.000\",\"14\"],[\"2019-10-24 10:15:00\",\"2900.000\",\"2900.000\",\"2894.000\",\"2898.000\",\"474\"],[\"2019-10-24 10:00:00\",\"2894.000\",\"2900.000\",\"2890.000\",\"2896.000\",\"2732\"],[\"2019-10-24 09:45:00\",\"2892.000\",\"2898.000\",\"2892.000\",\"2896.000\",\"2404\"],[\"2019-10-24 09:30:00\",\"2904.000\",\"2904.000\",\"2892.000\",\"2892.000\",\"4228\"],[\"2019-10-24 09:15:00\",\"2876.000\",\"2920.000\",\"2876.000\",\"2906.000\",\"14358\"],[\"2019-10-23 23:00:00\",\"2868.000\",\"2874.000\",\"2866.000\",\"2868.000\",\"1510\"],[\"2019-10-23 22:45:00\",\"2872.000\",\"2872.000\",\"2864.000\",\"2866.000\",\"1450\"],[\"2019-10-23 22:30:00\",\"2864.000\",\"2866.000\",\"2864.000\",\"2866.000\",\"680\"],[\"2019-10-23 22:15:00\",\"2862.000\",\"2866.000\",\"2862.000\",\"2862.000\",\"598\"],[\"2019-10-23 22:00:00\",\"2868.000\",\"2872.000\",\"2860.000\",\"2860.000\",\"2112\"],[\"2019-10-23 21:45:00\",\"2862.000\",\"2870.000\",\"2860.000\",\"2866.000\",\"3618\"],[\"2019-10-23 21:30:00\",\"2854.000\",\"2856.000\",\"2854.000\",\"2856.000\",\"282\"],[\"2019-10-23 21:15:00\",\"2850.000\",\"2858.000\",\"2850.000\",\"2852.000\",\"2066\"],[\"2019-10-23 15:00:00\",\"2852.000\",\"2860.000\",\"2850.000\",\"2860.000\",\"1412\"],[\"2019-10-23 14:45:00\",\"2858.000\",\"2858.000\",\"2852.000\",\"2852.000\",\"1824\"],[\"2019-10-23 14:30:00\",\"2854.000\",\"2856.000\",\"2852.000\",\"2854.000\",\"1210\"],[\"2019-10-23 14:15:00\",\"2858.000\",\"2858.000\",\"2854.000\",\"2854.000\",\"626\"],[\"2019-10-23 14:00:00\",\"2854.000\",\"2858.000\",\"2852.000\",\"2858.000\",\"1434\"],[\"2019-10-23 13:45:00\",\"2852.000\",\"2856.000\",\"2848.000\",\"2856.000\",\"844\"],[\"2019-10-23 11:30:00\",\"2850.000\",\"2852.000\",\"2848.000\",\"2852.000\",\"282\"],[\"2019-10-23 11:15:00\",\"2848.000\",\"2856.000\",\"2848.000\",\"2852.000\",\"738\"],[\"2019-10-23 11:00:00\",\"2844.000\",\"2852.000\",\"2840.000\",\"2850.000\",\"834\"],[\"2019-10-23 10:45:00\",\"2844.000\",\"2846.000\",\"2842.000\",\"2842.000\",\"380\"],[\"2019-10-23 10:15:00\",\"2840.000\",\"2846.000\",\"2840.000\",\"2844.000\",\"614\"],[\"2019-10-23 10:00:00\",\"2842.000\",\"2844.000\",\"2838.000\",\"2838.000\",\"1946\"],[\"2019-10-23 09:45:00\",\"2850.000\",\"2850.000\",\"2844.000\",\"2844.000\",\"926\"],[\"2019-10-23 09:30:00\",\"2852.000\",\"2854.000\",\"2846.000\",\"2846.000\",\"770\"],[\"2019-10-23 09:15:00\",\"2854.000\",\"2856.000\",\"2850.000\",\"2852.000\",\"842\"],[\"2019-10-22 23:00:00\",\"2854.000\",\"2858.000\",\"2854.000\",\"2856.000\",\"990\"],[\"2019-10-22 22:45:00\",\"2856.000\",\"2858.000\",\"2854.000\",\"2854.000\",\"348\"],[\"2019-10-22 22:30:00\",\"2856.000\",\"2860.000\",\"2856.000\",\"2856.000\",\"772\"],[\"2019-10-22 22:15:00\",\"2856.000\",\"2856.000\",\"2850.000\",\"2856.000\",\"1422\"],[\"2019-10-22 22:00:00\",\"2854.000\",\"2858.000\",\"2854.000\",\"2856.000\",\"188\"],[\"2019-10-22 21:45:00\",\"2854.000\",\"2858.000\",\"2854.000\",\"2856.000\",\"608\"],[\"2019-10-22 21:30:00\",\"2854.000\",\"2860.000\",\"2854.000\",\"2856.000\",\"1368\"],[\"2019-10-22 21:15:00\",\"2856.000\",\"2858.000\",\"2850.000\",\"2854.000\",\"1308\"],[\"2019-10-22 15:00:00\",\"2842.000\",\"2846.000\",\"2842.000\",\"2846.000\",\"882\"],[\"2019-10-22 14:45:00\",\"2852.000\",\"2852.000\",\"2844.000\",\"2844.000\",\"852\"],[\"2019-10-22 14:30:00\",\"2850.000\",\"2852.000\",\"2850.000\",\"2850.000\",\"1106\"],[\"2019-10-22 14:15:00\",\"2848.000\",\"2852.000\",\"2846.000\",\"2850.000\",\"502\"],[\"2019-10-22 14:00:00\",\"2842.000\",\"2848.000\",\"2842.000\",\"2848.000\",\"408\"],[\"2019-10-22 13:45:00\",\"2842.000\",\"2844.000\",\"2840.000\",\"2842.000\",\"500\"],[\"2019-10-22 11:30:00\",\"2846.000\",\"2846.000\",\"2840.000\",\"2842.000\",\"276\"],[\"2019-10-22 11:15:00\",\"2844.000\",\"2846.000\",\"2844.000\",\"2844.000\",\"236\"],[\"2019-10-22 11:00:00\",\"2844.000\",\"2848.000\",\"2844.000\",\"2844.000\",\"394\"],[\"2019-10-22 10:45:00\",\"2844.000\",\"2848.000\",\"2842.000\",\"2842.000\",\"928\"],[\"2019-10-22 10:15:00\",\"2840.000\",\"2846.000\",\"2840.000\",\"2846.000\",\"466\"],[\"2019-10-22 10:00:00\",\"2844.000\",\"2844.000\",\"2840.000\",\"2840.000\",\"76\"],[\"2019-10-22 09:45:00\",\"2840.000\",\"2842.000\",\"2840.000\",\"2842.000\",\"540\"],[\"2019-10-22 09:30:00\",\"2854.000\",\"2854.000\",\"2842.000\",\"2842.000\",\"926\"],[\"2019-10-22 09:15:00\",\"2848.000\",\"2852.000\",\"2844.000\",\"2852.000\",\"598\"],[\"2019-10-21 23:00:00\",\"2846.000\",\"2846.000\",\"2842.000\",\"2842.000\",\"662\"],[\"2019-10-21 22:45:00\",\"2848.000\",\"2848.000\",\"2844.000\",\"2846.000\",\"320\"],[\"2019-10-21 22:30:00\",\"2846.000\",\"2846.000\",\"2844.000\",\"2844.000\",\"162\"],[\"2019-10-21 22:15:00\",\"2848.000\",\"2850.000\",\"2844.000\",\"2846.000\",\"392\"],[\"2019-10-21 22:00:00\",\"2844.000\",\"2852.000\",\"2842.000\",\"2846.000\",\"1344\"],[\"2019-10-21 21:45:00\",\"2832.000\",\"2844.000\",\"2832.000\",\"2844.000\",\"1276\"],[\"2019-10-21 21:30:00\",\"2838.000\",\"2838.000\",\"2830.000\",\"2830.000\",\"1034\"],[\"2019-10-21 21:15:00\",\"2846.000\",\"2848.000\",\"2832.000\",\"2836.000\",\"1774\"],[\"2019-10-21 15:00:00\",\"2854.000\",\"2856.000\",\"2848.000\",\"2856.000\",\"1318\"],[\"2019-10-21 14:45:00\",\"2850.000\",\"2854.000\",\"2848.000\",\"2852.000\",\"658\"],[\"2019-10-21 14:30:00\",\"2842.000\",\"2852.000\",\"2842.000\",\"2850.000\",\"1458\"],[\"2019-10-21 14:15:00\",\"2838.000\",\"2842.000\",\"2836.000\",\"2842.000\",\"1014\"],[\"2019-10-21 14:00:00\",\"2836.000\",\"2838.000\",\"2834.000\",\"2836.000\",\"462\"],[\"2019-10-21 13:45:00\",\"2834.000\",\"2838.000\",\"2834.000\",\"2836.000\",\"752\"],[\"2019-10-21 11:30:00\",\"2838.000\",\"2840.000\",\"2836.000\",\"2838.000\",\"650\"],[\"2019-10-21 11:15:00\",\"2838.000\",\"2840.000\",\"2834.000\",\"2840.000\",\"1282\"],[\"2019-10-21 11:00:00\",\"2836.000\",\"2838.000\",\"2836.000\",\"2838.000\",\"360\"],[\"2019-10-21 10:45:00\",\"2834.000\",\"2840.000\",\"2834.000\",\"2838.000\",\"476\"],[\"2019-10-21 10:30:00\",\"2832.000\",\"2832.000\",\"2832.000\",\"2832.000\",\"4\"],[\"2019-10-21 10:15:00\",\"2834.000\",\"2834.000\",\"2830.000\",\"2832.000\",\"802\"],[\"2019-10-21 10:00:00\",\"2838.000\",\"2840.000\",\"2832.000\",\"2834.000\",\"1512\"],[\"2019-10-21 09:45:00\",\"2846.000\",\"2846.000\",\"2836.000\",\"2836.000\",\"1484\"],[\"2019-10-21 09:30:00\",\"2844.000\",\"2848.000\",\"2840.000\",\"2844.000\",\"1268\"],[\"2019-10-21 09:15:00\",\"2850.000\",\"2854.000\",\"2844.000\",\"2848.000\",\"2518\"],[\"2019-10-18 23:00:00\",\"2854.000\",\"2856.000\",\"2850.000\",\"2854.000\",\"758\"],[\"2019-10-18 22:45:00\",\"2852.000\",\"2858.000\",\"2850.000\",\"2854.000\",\"1904\"],[\"2019-10-18 22:30:00\",\"2860.000\",\"2876.000\",\"2852.000\",\"2852.000\",\"4440\"],[\"2019-10-18 22:15:00\",\"2860.000\",\"2864.000\",\"2856.000\",\"2860.000\",\"1262\"],[\"2019-10-18 22:00:00\",\"2856.000\",\"2858.000\",\"2852.000\",\"2858.000\",\"3136\"],[\"2019-10-18 21:45:00\",\"2848.000\",\"2862.000\",\"2848.000\",\"2856.000\",\"3144\"],[\"2019-10-18 21:30:00\",\"2844.000\",\"2844.000\",\"2840.000\",\"2842.000\",\"1036\"],[\"2019-10-18 21:15:00\",\"2846.000\",\"2846.000\",\"2838.000\",\"2842.000\",\"2640\"],[\"2019-10-18 15:00:00\",\"2840.000\",\"2844.000\",\"2840.000\",\"2840.000\",\"1348\"],[\"2019-10-18 14:45:00\",\"2842.000\",\"2842.000\",\"2838.000\",\"2840.000\",\"1796\"],[\"2019-10-18 14:30:00\",\"2822.000\",\"2846.000\",\"2820.000\",\"2846.000\",\"2046\"],[\"2019-10-18 14:15:00\",\"2822.000\",\"2822.000\",\"2816.000\",\"2822.000\",\"578\"],[\"2019-10-18 14:00:00\",\"2818.000\",\"2822.000\",\"2816.000\",\"2822.000\",\"1078\"],[\"2019-10-18 13:45:00\",\"2810.000\",\"2820.000\",\"2810.000\",\"2816.000\",\"1608\"],[\"2019-10-18 11:30:00\",\"2808.000\",\"2810.000\",\"2804.000\",\"2810.000\",\"1146\"],[\"2019-10-18 11:15:00\",\"2808.000\",\"2810.000\",\"2800.000\",\"2808.000\",\"2684\"],[\"2019-10-18 11:00:00\",\"2814.000\",\"2818.000\",\"2804.000\",\"2804.000\",\"1870\"],[\"2019-10-18 10:45:00\",\"2818.000\",\"2822.000\",\"2816.000\",\"2818.000\",\"1526\"],[\"2019-10-18 10:30:00\",\"2814.000\",\"2814.000\",\"2814.000\",\"2814.000\",\"12\"],[\"2019-10-18 10:15:00\",\"2818.000\",\"2818.000\",\"2814.000\",\"2818.000\",\"2928\"],[\"2019-10-18 10:00:00\",\"2822.000\",\"2832.000\",\"2810.000\",\"2812.000\",\"4740\"],[\"2019-10-18 09:45:00\",\"2842.000\",\"2844.000\",\"2832.000\",\"2832.000\",\"688\"],[\"2019-10-18 09:30:00\",\"2842.000\",\"2846.000\",\"2840.000\",\"2842.000\",\"612\"],[\"2019-10-18 09:15:00\",\"2844.000\",\"2844.000\",\"2838.000\",\"2842.000\",\"1150\"],[\"2019-10-17 23:00:00\",\"2836.000\",\"2840.000\",\"2836.000\",\"2840.000\",\"322\"],[\"2019-10-17 22:45:00\",\"2840.000\",\"2840.000\",\"2838.000\",\"2840.000\",\"236\"],[\"2019-10-17 22:30:00\",\"2836.000\",\"2840.000\",\"2836.000\",\"2840.000\",\"578\"],[\"2019-10-17 22:15:00\",\"2838.000\",\"2840.000\",\"2836.000\",\"2838.000\",\"452\"],[\"2019-10-17 22:00:00\",\"2836.000\",\"2840.000\",\"2836.000\",\"2840.000\",\"346\"],[\"2019-10-17 21:45:00\",\"2838.000\",\"2838.000\",\"2832.000\",\"2836.000\",\"852\"],[\"2019-10-17 21:30:00\",\"2844.000\",\"2844.000\",\"2834.000\",\"2834.000\",\"410\"],[\"2019-10-17 21:15:00\",\"2842.000\",\"2844.000\",\"2838.000\",\"2840.000\",\"1320\"],[\"2019-10-17 15:00:00\",\"2832.000\",\"2834.000\",\"2828.000\",\"2828.000\",\"1538\"],[\"2019-10-17 14:45:00\",\"2824.000\",\"2832.000\",\"2824.000\",\"2832.000\",\"874\"],[\"2019-10-17 14:30:00\",\"2832.000\",\"2832.000\",\"2826.000\",\"2826.000\",\"540\"],[\"2019-10-17 14:15:00\",\"2828.000\",\"2832.000\",\"2828.000\",\"2830.000\",\"584\"],[\"2019-10-17 14:00:00\",\"2834.000\",\"2834.000\",\"2828.000\",\"2828.000\",\"396\"],[\"2019-10-17 13:45:00\",\"2828.000\",\"2834.000\",\"2828.000\",\"2834.000\",\"506\"],[\"2019-10-17 11:30:00\",\"2834.000\",\"2834.000\",\"2830.000\",\"2832.000\",\"388\"],[\"2019-10-17 11:15:00\",\"2834.000\",\"2836.000\",\"2832.000\",\"2834.000\",\"718\"],[\"2019-10-17 11:00:00\",\"2834.000\",\"2836.000\",\"2832.000\",\"2832.000\",\"512\"],[\"2019-10-17 10:45:00\",\"2838.000\",\"2838.000\",\"2834.000\",\"2836.000\",\"832\"],[\"2019-10-17 10:15:00\",\"2838.000\",\"2840.000\",\"2836.000\",\"2840.000\",\"702\"]]";
 		
-//		AlertUtil.sleepIfNotDayWorkTime();
+		bu2006 = bu2006.replace("[[", "[").replace("]]", "]").replace("],[", "];[");
+
+		String[] dataArray = bu2006.replace("\"", "").replace("[", "").split(";");
 		
-//		LOGGER.info(AlertUtil.抓新浪取历史数据("BU0,MA0,RU0,TA0,HC0,RB0,I0,FG0,JM0,J0,ZC0,RM0,M0,A0,P0,Y0,OI0,CF0,SR0,C0,CS0,JD0,PP0,L0,V0,EG0,AP0,SF0,SM0,SP0", 0).replaceAll("var hq_str_", ""));
-//		DataHandle2 d = new DataHandle2();
-//		d.loadTodayKEntityList();
-		LOGGER.info(loadHisMinData("ma0",5) + "");
 		
+		ArrayList<KEntity> list = new ArrayList<KEntity>();
+		for (int k = 0; k <= dataArray.length - 1; k++) {
+			int r = loadHisData(dataArray[k], "MA2001", 15, list);
+			if (r == 0) {// 无效数据
+				break;
+			}
+		}
+
+		// 跳过后面部分k线
+		int i = list.size() - 1;
+		int j = i;
+		for (; i >= 0; i--) {
+			if (list.get(i).getTime().contains("09:15:00")) {
+				j = i;
+				break;
+			}
+		}
+
+		// 进行半小时合并
+		ArrayList<KEntity> halfList = new ArrayList<KEntity>();
+
+		for (; i >= 0; i--) {
+			KEntity firstEntity = list.get(i);
+			if (i == 0) {
+				halfList.add(firstEntity);
+				break;
+			}
+			KEntity secondEntity = list.get(i - 1);
+			if (firstEntity.getTime().contains("23:30:00")
+					|| firstEntity.getTime().contains("23:00:00") && secondEntity.getTime().contains("09:15:00")) {
+				;// 晚上最后一根K线，不需要跟第二天的合并
+			} else {
+				firstEntity.setOpen(secondEntity.getOpen());
+				firstEntity.setHigh(firstEntity.getHigh() > secondEntity.getHigh() ? firstEntity.getHigh()
+						: secondEntity.getHigh());
+				firstEntity.setMin(
+						firstEntity.getMin() < secondEntity.getMin() ? firstEntity.getMin() : secondEntity.getMin());
+				firstEntity.setPreIndex(halfList.size() - 1);
+				i--;
+			}
+
+			try {
+				String time = firstEntity.getTime();
+				GregorianCalendar gc = new GregorianCalendar();
+				gc.setTime(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(time));
+				if (gc.get(Calendar.HOUR_OF_DAY) <= 15) {
+					long tt = gc.getTimeInMillis() - 15 * 1000 * 60;
+					gc.setTimeInMillis(tt);
+					firstEntity.setTime(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(gc.getTime()));
+				} else {
+					long tt = gc.getTimeInMillis() - 30 * 1000 * 60;
+					gc.setTimeInMillis(tt);
+					firstEntity.setTime(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(gc.getTime()));
+				}
+
+			} catch (ParseException e) {
+				LOGGER.error(e.getMessage(), e);
+			}
+			halfList.add(firstEntity);
+
+		}
+
+		System.out.println("=====================半小时=====================");
+		for (KEntity k : halfList) {
+			System.out.println(k.getTime());
+		}
+		System.out.println("=====================半小时=====================");
+		
+		
+		// 进行1小时合并
+		// 跳过后面部分k线
+		i = list.size() - 1;
+		for (; i >= 0; i--) {
+			if (list.get(i).getTime().contains("21:15:00")) {
+				break;
+			}
+		}
+
+		
+		ArrayList<KEntity> hourList = new ArrayList<KEntity>();
+
+		for (; i >= 3; i--) {
+			KEntity firstEntity = list.get(i);
+			if(firstEntity.getTime().contains("15:00:00")) {
+				hourList.add(firstEntity);
+				try {
+					String time = firstEntity.getTime();
+					GregorianCalendar gc = new GregorianCalendar();
+					gc.setTime(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(time));
+					if (gc.get(Calendar.HOUR_OF_DAY) >= 15) {
+						long tt = gc.getTimeInMillis() - 15 * 1000 * 60;
+						gc.setTimeInMillis(tt);
+						firstEntity.setTime(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(gc.getTime()));
+					} else {
+						long tt = gc.getTimeInMillis() - 15 * 1000 * 60;
+						gc.setTimeInMillis(tt);
+						firstEntity.setTime(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(gc.getTime()));
+					}
+
+				} catch (ParseException e) {
+					LOGGER.error(e.getMessage(), e);
+				}
+				continue;
+			}
+			
+			KEntity secondEntity = list.get(i - 1);
+			KEntity thirdEntity = list.get(i - 2);
+			KEntity fourthEntity = list.get(i - 3);
+//			if (firstEntity.getTime().contains("23:30:00")
+//					|| firstEntity.getTime().contains("23:00:00") && secondEntity.getTime().contains("09:15:00")) {
+//				;// 晚上最后一根K线，不需要跟第二天的合并
+//			} else {
+//
+//			}
+			
+			firstEntity.setOpen(secondEntity.getOpen());
+			firstEntity.setHigh(firstEntity.getHigh() > secondEntity.getHigh() ? firstEntity.getHigh()
+					: secondEntity.getHigh());
+			firstEntity.setMin(
+					firstEntity.getMin() < secondEntity.getMin() ? firstEntity.getMin() : secondEntity.getMin());
+			firstEntity.setPreIndex(hourList.size() - 1);
+			i = i-3;
+
+			try {
+				String time = firstEntity.getTime();
+				GregorianCalendar gc = new GregorianCalendar();
+				gc.setTime(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(time));
+				if (gc.get(Calendar.HOUR_OF_DAY) >= 15) {
+					long tt = gc.getTimeInMillis() - 15 * 1000 * 60;
+					gc.setTimeInMillis(tt);
+					firstEntity.setTime(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(gc.getTime()));
+				} else {
+					long tt = gc.getTimeInMillis() - 0 * 1000 * 60;
+					gc.setTimeInMillis(tt);
+					firstEntity.setTime(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(gc.getTime()));
+				}
+
+			} catch (ParseException e) {
+				LOGGER.error(e.getMessage(), e);
+			}
+			// System.out.println("T1:" + firstEntity.getTime() + " T2" +
+			// secondEntity.getTime());
+			hourList.add(firstEntity);
+		}
+		
+		//合并最后一根小时K线，由最近几根15分钟线构成
+		System.out.println("=====================小时=====================");
+		for (KEntity k : hourList) {
+			System.out.println(k.getTime());
+		}
+		System.out.println("=====================小时=====================");
+		
+		
+		
+	}
+
+	/**到晚上23:30分的，有7根，对于这种情况还需要考虑周五没有交易的情况
+14:45:00[14:45:00,15:00:00]
+
+13:45:00[13:45:00,14:00:00,14:15:00,14:30:00]
+
+10:45:00[10:45:00,11:00:00,11:15:00,11:30:00]
+
+09:30:00[09:45:00,10:00:00,10:15:00,10:30:00]
+
+23:00:00[23:15:00,23:30:00,09:15:00,09:30:00]==============如果前一天晚上无行情，则只有[09:15:00,09:30:00]
+
+22:00:00[22:15:00,22:30:00,22:45:00,23:00:00]
+
+21:00:00[21:15:00,21:30:00,21:45:00,22:00:00]
+	 * @param args
+	 */
+	public static void mainForMa(String[] args) {
+
+		//LOGGER.info(loadHisMinData("ma0", 5) + "");
+
 		String data = "[[\"2019-10-30 13:45:00\",\"2090.000\",\"2111.000\",\"2090.000\",\"2111.000\",\"265142\"],[\"2019-10-30 11:30:00\",\"2087.000\",\"2091.000\",\"2086.000\",\"2091.000\",\"50582\"],[\"2019-10-30 11:15:00\",\"2084.000\",\"2088.000\",\"2082.000\",\"2088.000\",\"37480\"],[\"2019-10-30 11:00:00\",\"2088.000\",\"2089.000\",\"2083.000\",\"2084.000\",\"48850\"],[\"2019-10-30 10:45:00\",\"2086.000\",\"2089.000\",\"2086.000\",\"2087.000\",\"40516\"],[\"2019-10-30 10:30:00\",\"2088.000\",\"2088.000\",\"2088.000\",\"2088.000\",\"888\"],[\"2019-10-30 10:15:00\",\"2083.000\",\"2089.000\",\"2082.000\",\"2087.000\",\"77500\"],[\"2019-10-30 10:00:00\",\"2081.000\",\"2081.000\",\"2078.000\",\"2080.000\",\"37014\"],[\"2019-10-30 09:45:00\",\"2077.000\",\"2081.000\",\"2077.000\",\"2079.000\",\"37330\"],[\"2019-10-30 09:30:00\",\"2075.000\",\"2081.000\",\"2074.000\",\"2077.000\",\"116972\"],[\"2019-10-30 09:15:00\",\"2089.000\",\"2091.000\",\"2076.000\",\"2076.000\",\"167008\"],[\"2019-10-29 23:30:00\",\"2090.000\",\"2091.000\",\"2085.000\",\"2086.000\",\"35638\"],[\"2019-10-29 23:15:00\",\"2089.000\",\"2092.000\",\"2089.000\",\"2091.000\",\"19630\"],[\"2019-10-29 23:00:00\",\"2090.000\",\"2091.000\",\"2088.000\",\"2088.000\",\"24352\"],[\"2019-10-29 22:45:00\",\"2088.000\",\"2089.000\",\"2086.000\",\"2089.000\",\"32254\"],[\"2019-10-29 22:30:00\",\"2092.000\",\"2092.000\",\"2089.000\",\"2089.000\",\"23986\"],[\"2019-10-29 22:15:00\",\"2087.000\",\"2093.000\",\"2087.000\",\"2091.000\",\"59822\"],[\"2019-10-29 22:00:00\",\"2089.000\",\"2089.000\",\"2086.000\",\"2086.000\",\"31382\"],[\"2019-10-29 21:45:00\",\"2086.000\",\"2089.000\",\"2085.000\",\"2089.000\",\"60042\"],[\"2019-10-29 21:30:00\",\"2094.000\",\"2094.000\",\"2083.000\",\"2087.000\",\"154748\"],[\"2019-10-29 21:15:00\",\"2092.000\",\"2095.000\",\"2089.000\",\"2091.000\",\"144132\"],[\"2019-10-29 15:00:00\",\"2101.000\",\"2101.000\",\"2099.000\",\"2099.000\",\"46086\"],[\"2019-10-29 14:45:00\",\"2099.000\",\"2102.000\",\"2099.000\",\"2102.000\",\"28196\"],[\"2019-10-29 14:30:00\",\"2102.000\",\"2103.000\",\"2097.000\",\"2099.000\",\"34318\"],[\"2019-10-29 14:15:00\",\"2100.000\",\"2105.000\",\"2100.000\",\"2102.000\",\"40126\"],[\"2019-10-29 14:00:00\",\"2101.000\",\"2105.000\",\"2100.000\",\"2102.000\",\"38438\"],[\"2019-10-29 13:45:00\",\"2096.000\",\"2104.000\",\"2096.000\",\"2103.000\",\"53348\"],[\"2019-10-29 11:30:00\",\"2102.000\",\"2102.000\",\"2097.000\",\"2098.000\",\"59536\"],[\"2019-10-29 11:15:00\",\"2103.000\",\"2109.000\",\"2101.000\",\"2101.000\",\"98432\"],[\"2019-10-29 11:00:00\",\"2104.000\",\"2107.000\",\"2102.000\",\"2103.000\",\"59008\"],[\"2019-10-29 10:45:00\",\"2101.000\",\"2104.000\",\"2099.000\",\"2104.000\",\"45548\"],[\"2019-10-29 10:30:00\",\"2102.000\",\"2102.000\",\"2102.000\",\"2102.000\",\"404\"],[\"2019-10-29 10:15:00\",\"2103.000\",\"2105.000\",\"2102.000\",\"2102.000\",\"26324\"],[\"2019-10-29 10:00:00\",\"2102.000\",\"2105.000\",\"2101.000\",\"2104.000\",\"33446\"],[\"2019-10-29 09:45:00\",\"2100.000\",\"2104.000\",\"2098.000\",\"2102.000\",\"85636\"],[\"2019-10-29 09:30:00\",\"2102.000\",\"2102.000\",\"2095.000\",\"2097.000\",\"105528\"],[\"2019-10-29 09:15:00\",\"2097.000\",\"2109.000\",\"2096.000\",\"2105.000\",\"166486\"],[\"2019-10-28 23:30:00\",\"2101.000\",\"2103.000\",\"2100.000\",\"2101.000\",\"46124\"],[\"2019-10-28 23:15:00\",\"2096.000\",\"2101.000\",\"2096.000\",\"2101.000\",\"30790\"],[\"2019-10-28 23:00:00\",\"2098.000\",\"2100.000\",\"2095.000\",\"2098.000\",\"29078\"],[\"2019-10-28 22:45:00\",\"2096.000\",\"2099.000\",\"2095.000\",\"2098.000\",\"58386\"],[\"2019-10-28 22:30:00\",\"2101.000\",\"2102.000\",\"2098.000\",\"2099.000\",\"43900\"],[\"2019-10-28 22:15:00\",\"2101.000\",\"2102.000\",\"2099.000\",\"2102.000\",\"57272\"],[\"2019-10-28 22:00:00\",\"2100.000\",\"2105.000\",\"2098.000\",\"2105.000\",\"103642\"],[\"2019-10-28 21:45:00\",\"2093.000\",\"2102.000\",\"2093.000\",\"2101.000\",\"89318\"],[\"2019-10-28 21:30:00\",\"2100.000\",\"2100.000\",\"2094.000\",\"2094.000\",\"114270\"],[\"2019-10-28 21:15:00\",\"2090.000\",\"2102.000\",\"2090.000\",\"2102.000\",\"246808\"],[\"2019-10-28 15:00:00\",\"2078.000\",\"2088.000\",\"2078.000\",\"2086.000\",\"174600\"],[\"2019-10-28 14:45:00\",\"2067.000\",\"2079.000\",\"2066.000\",\"2079.000\",\"114542\"],[\"2019-10-28 14:30:00\",\"2066.000\",\"2069.000\",\"2064.000\",\"2067.000\",\"30724\"],[\"2019-10-28 14:15:00\",\"2066.000\",\"2069.000\",\"2063.000\",\"2065.000\",\"58672\"],[\"2019-10-28 14:00:00\",\"2068.000\",\"2070.000\",\"2066.000\",\"2066.000\",\"66428\"],[\"2019-10-28 13:45:00\",\"2077.000\",\"2077.000\",\"2062.000\",\"2066.000\",\"242766\"],[\"2019-10-28 11:30:00\",\"2084.000\",\"2084.000\",\"2077.000\",\"2077.000\",\"90884\"],[\"2019-10-28 11:15:00\",\"2083.000\",\"2084.000\",\"2081.000\",\"2082.000\",\"66972\"],[\"2019-10-28 11:00:00\",\"2089.000\",\"2090.000\",\"2087.000\",\"2087.000\",\"41548\"],[\"2019-10-28 10:45:00\",\"2088.000\",\"2088.000\",\"2085.000\",\"2088.000\",\"41360\"],[\"2019-10-28 10:30:00\",\"2087.000\",\"2087.000\",\"2087.000\",\"2087.000\",\"8\"],[\"2019-10-28 10:15:00\",\"2081.000\",\"2089.000\",\"2081.000\",\"2087.000\",\"49300\"],[\"2019-10-28 10:00:00\",\"2082.000\",\"2085.000\",\"2080.000\",\"2080.000\",\"56932\"],[\"2019-10-28 09:45:00\",\"2086.000\",\"2087.000\",\"2082.000\",\"2082.000\",\"37460\"],[\"2019-10-28 09:30:00\",\"2090.000\",\"2090.000\",\"2084.000\",\"2084.000\",\"57174\"],[\"2019-10-28 09:15:00\",\"2088.000\",\"2092.000\",\"2086.000\",\"2091.000\",\"112434\"],[\"2019-10-25 23:30:00\",\"2087.000\",\"2088.000\",\"2082.000\",\"2082.000\",\"54872\"],[\"2019-10-25 23:15:00\",\"2088.000\",\"2090.000\",\"2086.000\",\"2086.000\",\"36620\"],[\"2019-10-25 23:00:00\",\"2089.000\",\"2090.000\",\"2087.000\",\"2089.000\",\"37490\"],[\"2019-10-25 22:45:00\",\"2082.000\",\"2091.000\",\"2082.000\",\"2088.000\",\"109008\"],[\"2019-10-25 22:30:00\",\"2082.000\",\"2082.000\",\"2076.000\",\"2081.000\",\"109594\"],[\"2019-10-25 22:15:00\",\"2083.000\",\"2084.000\",\"2081.000\",\"2081.000\",\"46742\"],[\"2019-10-25 22:00:00\",\"2087.000\",\"2087.000\",\"2081.000\",\"2081.000\",\"50940\"],[\"2019-10-25 21:45:00\",\"2088.000\",\"2090.000\",\"2084.000\",\"2088.000\",\"47536\"],[\"2019-10-25 21:30:00\",\"2086.000\",\"2089.000\",\"2086.000\",\"2087.000\",\"72014\"],[\"2019-10-25 21:15:00\",\"2083.000\",\"2087.000\",\"2077.000\",\"2087.000\",\"144830\"],[\"2019-10-25 15:00:00\",\"2086.000\",\"2086.000\",\"2078.000\",\"2078.000\",\"196584\"],[\"2019-10-25 14:45:00\",\"2092.000\",\"2092.000\",\"2083.000\",\"2087.000\",\"116976\"],[\"2019-10-25 14:30:00\",\"2091.000\",\"2091.000\",\"2087.000\",\"2090.000\",\"73062\"],[\"2019-10-25 14:15:00\",\"2091.000\",\"2093.000\",\"2086.000\",\"2089.000\",\"203074\"],[\"2019-10-25 14:00:00\",\"2100.000\",\"2101.000\",\"2092.000\",\"2092.000\",\"105294\"],[\"2019-10-25 13:45:00\",\"2097.000\",\"2100.000\",\"2090.000\",\"2098.000\",\"193022\"],[\"2019-10-25 11:30:00\",\"2124.000\",\"2124.000\",\"2095.000\",\"2099.000\",\"407026\"],[\"2019-10-25 11:15:00\",\"2124.000\",\"2126.000\",\"2123.000\",\"2123.000\",\"19706\"],[\"2019-10-25 11:00:00\",\"2124.000\",\"2125.000\",\"2122.000\",\"2125.000\",\"23814\"],[\"2019-10-25 10:45:00\",\"2123.000\",\"2125.000\",\"2122.000\",\"2125.000\",\"34832\"],[\"2019-10-25 10:30:00\",\"2124.000\",\"2124.000\",\"2124.000\",\"2124.000\",\"446\"],[\"2019-10-25 10:15:00\",\"2126.000\",\"2126.000\",\"2124.000\",\"2125.000\",\"27868\"],[\"2019-10-25 10:00:00\",\"2129.000\",\"2129.000\",\"2125.000\",\"2125.000\",\"40558\"],[\"2019-10-25 09:45:00\",\"2127.000\",\"2133.000\",\"2127.000\",\"2129.000\",\"69882\"],[\"2019-10-25 09:30:00\",\"2122.000\",\"2127.000\",\"2120.000\",\"2127.000\",\"77172\"],[\"2019-10-25 09:15:00\",\"2126.000\",\"2128.000\",\"2124.000\",\"2124.000\",\"62718\"],[\"2019-10-24 23:30:00\",\"2128.000\",\"2128.000\",\"2122.000\",\"2123.000\",\"62994\"],[\"2019-10-24 23:15:00\",\"2129.000\",\"2130.000\",\"2125.000\",\"2128.000\",\"48302\"],[\"2019-10-24 23:00:00\",\"2132.000\",\"2132.000\",\"2129.000\",\"2129.000\",\"31310\"],[\"2019-10-24 22:45:00\",\"2131.000\",\"2133.000\",\"2129.000\",\"2131.000\",\"31070\"],[\"2019-10-24 22:30:00\",\"2128.000\",\"2132.000\",\"2128.000\",\"2131.000\",\"26428\"],[\"2019-10-24 22:15:00\",\"2129.000\",\"2130.000\",\"2126.000\",\"2127.000\",\"53526\"],[\"2019-10-24 22:00:00\",\"2132.000\",\"2133.000\",\"2128.000\",\"2129.000\",\"48660\"],[\"2019-10-24 21:45:00\",\"2131.000\",\"2134.000\",\"2130.000\",\"2134.000\",\"37794\"],[\"2019-10-24 21:30:00\",\"2133.000\",\"2134.000\",\"2131.000\",\"2132.000\",\"52754\"],[\"2019-10-24 21:15:00\",\"2134.000\",\"2136.000\",\"2131.000\",\"2136.000\",\"125546\"],[\"2019-10-24 15:00:00\",\"2128.000\",\"2132.000\",\"2124.000\",\"2132.000\",\"84892\"],[\"2019-10-24 14:45:00\",\"2127.000\",\"2130.000\",\"2126.000\",\"2128.000\",\"42180\"],[\"2019-10-24 14:30:00\",\"2132.000\",\"2132.000\",\"2125.000\",\"2127.000\",\"106442\"],[\"2019-10-24 14:15:00\",\"2137.000\",\"2138.000\",\"2131.000\",\"2131.000\",\"81562\"],[\"2019-10-24 14:00:00\",\"2132.000\",\"2144.000\",\"2132.000\",\"2139.000\",\"177430\"],[\"2019-10-24 13:45:00\",\"2129.000\",\"2133.000\",\"2127.000\",\"2133.000\",\"44106\"],[\"2019-10-24 11:30:00\",\"2130.000\",\"2133.000\",\"2129.000\",\"2129.000\",\"36104\"],[\"2019-10-24 11:15:00\",\"2130.000\",\"2133.000\",\"2127.000\",\"2131.000\",\"40106\"],[\"2019-10-24 11:00:00\",\"2123.000\",\"2130.000\",\"2123.000\",\"2128.000\",\"80540\"],[\"2019-10-24 10:45:00\",\"2121.000\",\"2125.000\",\"2117.000\",\"2125.000\",\"78624\"],[\"2019-10-24 10:30:00\",\"2121.000\",\"2121.000\",\"2121.000\",\"2121.000\",\"310\"],[\"2019-10-24 10:15:00\",\"2120.000\",\"2122.000\",\"2120.000\",\"2120.000\",\"31010\"],[\"2019-10-24 10:00:00\",\"2118.000\",\"2121.000\",\"2116.000\",\"2120.000\",\"54330\"],[\"2019-10-24 09:45:00\",\"2120.000\",\"2122.000\",\"2118.000\",\"2121.000\",\"67064\"],[\"2019-10-24 09:30:00\",\"2122.000\",\"2123.000\",\"2118.000\",\"2118.000\",\"92392\"],[\"2019-10-24 09:15:00\",\"2135.000\",\"2135.000\",\"2121.000\",\"2123.000\",\"167272\"],[\"2019-10-23 23:30:00\",\"2137.000\",\"2137.000\",\"2133.000\",\"2135.000\",\"45402\"],[\"2019-10-23 23:15:00\",\"2134.000\",\"2136.000\",\"2132.000\",\"2136.000\",\"39578\"],[\"2019-10-23 23:00:00\",\"2131.000\",\"2138.000\",\"2131.000\",\"2133.000\",\"63700\"],[\"2019-10-23 22:45:00\",\"2137.000\",\"2137.000\",\"2133.000\",\"2133.000\",\"46098\"],[\"2019-10-23 22:30:00\",\"2130.000\",\"2134.000\",\"2128.000\",\"2134.000\",\"48742\"],[\"2019-10-23 22:15:00\",\"2132.000\",\"2135.000\",\"2131.000\",\"2131.000\",\"39252\"],[\"2019-10-23 22:00:00\",\"2134.000\",\"2136.000\",\"2131.000\",\"2132.000\",\"62326\"],[\"2019-10-23 21:45:00\",\"2131.000\",\"2134.000\",\"2130.000\",\"2134.000\",\"107862\"],[\"2019-10-23 21:30:00\",\"2127.000\",\"2130.000\",\"2126.000\",\"2129.000\",\"67358\"],[\"2019-10-23 21:15:00\",\"2119.000\",\"2130.000\",\"2118.000\",\"2127.000\",\"230272\"],[\"2019-10-23 15:00:00\",\"2119.000\",\"2124.000\",\"2116.000\",\"2122.000\",\"139922\"],[\"2019-10-23 14:45:00\",\"2130.000\",\"2130.000\",\"2115.000\",\"2120.000\",\"139386\"],[\"2019-10-23 14:30:00\",\"2131.000\",\"2135.000\",\"2130.000\",\"2130.000\",\"42940\"],[\"2019-10-23 14:15:00\",\"2134.000\",\"2137.000\",\"2132.000\",\"2133.000\",\"55158\"],[\"2019-10-23 14:00:00\",\"2128.000\",\"2135.000\",\"2128.000\",\"2133.000\",\"58270\"],[\"2019-10-23 13:45:00\",\"2128.000\",\"2135.000\",\"2127.000\",\"2130.000\",\"65628\"],[\"2019-10-23 11:30:00\",\"2130.000\",\"2131.000\",\"2126.000\",\"2130.000\",\"39946\"],[\"2019-10-23 11:15:00\",\"2128.000\",\"2132.000\",\"2127.000\",\"2129.000\",\"66814\"],[\"2019-10-23 11:00:00\",\"2126.000\",\"2129.000\",\"2124.000\",\"2128.000\",\"51208\"],[\"2019-10-23 10:45:00\",\"2127.000\",\"2128.000\",\"2121.000\",\"2126.000\",\"103190\"],[\"2019-10-23 10:30:00\",\"2127.000\",\"2127.000\",\"2127.000\",\"2127.000\",\"152\"],[\"2019-10-23 10:15:00\",\"2130.000\",\"2130.000\",\"2126.000\",\"2128.000\",\"57532\"],[\"2019-10-23 10:00:00\",\"2129.000\",\"2134.000\",\"2125.000\",\"2127.000\",\"159326\"],[\"2019-10-23 09:45:00\",\"2141.000\",\"2143.000\",\"2129.000\",\"2129.000\",\"137706\"],[\"2019-10-23 09:30:00\",\"2147.000\",\"2150.000\",\"2141.000\",\"2142.000\",\"94220\"],[\"2019-10-23 09:15:00\",\"2153.000\",\"2153.000\",\"2145.000\",\"2147.000\",\"148328\"],[\"2019-10-22 23:30:00\",\"2166.000\",\"2167.000\",\"2157.000\",\"2157.000\",\"57568\"],[\"2019-10-22 23:15:00\",\"2166.000\",\"2168.000\",\"2163.000\",\"2165.000\",\"61044\"],[\"2019-10-22 23:00:00\",\"2161.000\",\"2167.000\",\"2161.000\",\"2167.000\",\"56594\"],[\"2019-10-22 22:45:00\",\"2159.000\",\"2162.000\",\"2159.000\",\"2161.000\",\"12228\"],[\"2019-10-22 22:30:00\",\"2158.000\",\"2161.000\",\"2158.000\",\"2160.000\",\"20606\"],[\"2019-10-22 22:15:00\",\"2164.000\",\"2164.000\",\"2158.000\",\"2158.000\",\"37358\"],[\"2019-10-22 22:00:00\",\"2162.000\",\"2164.000\",\"2160.000\",\"2164.000\",\"43854\"],[\"2019-10-22 21:45:00\",\"2159.000\",\"2162.000\",\"2159.000\",\"2162.000\",\"30484\"],[\"2019-10-22 21:30:00\",\"2158.000\",\"2163.000\",\"2156.000\",\"2161.000\",\"92362\"],[\"2019-10-22 21:15:00\",\"2157.000\",\"2162.000\",\"2155.000\",\"2158.000\",\"135088\"],[\"2019-10-22 15:00:00\",\"2151.000\",\"2153.000\",\"2150.000\",\"2153.000\",\"41612\"],[\"2019-10-22 14:45:00\",\"2154.000\",\"2155.000\",\"2152.000\",\"2152.000\",\"31256\"],[\"2019-10-22 14:30:00\",\"2153.000\",\"2154.000\",\"2147.000\",\"2153.000\",\"45810\"],[\"2019-10-22 14:15:00\",\"2151.000\",\"2153.000\",\"2150.000\",\"2153.000\",\"22568\"],[\"2019-10-22 14:00:00\",\"2149.000\",\"2153.000\",\"2148.000\",\"2151.000\",\"46656\"],[\"2019-10-22 13:45:00\",\"2146.000\",\"2149.000\",\"2146.000\",\"2148.000\",\"37902\"],[\"2019-10-22 11:30:00\",\"2150.000\",\"2150.000\",\"2143.000\",\"2145.000\",\"71822\"],[\"2019-10-22 11:15:00\",\"2154.000\",\"2154.000\",\"2151.000\",\"2151.000\",\"26594\"],[\"2019-10-22 11:00:00\",\"2152.000\",\"2155.000\",\"2152.000\",\"2154.000\",\"16654\"],[\"2019-10-22 10:45:00\",\"2153.000\",\"2157.000\",\"2152.000\",\"2152.000\",\"27964\"],[\"2019-10-22 10:30:00\",\"2156.000\",\"2156.000\",\"2156.000\",\"2156.000\",\"134\"],[\"2019-10-22 10:15:00\",\"2156.000\",\"2159.000\",\"2155.000\",\"2157.000\",\"55870\"],[\"2019-10-22 10:00:00\",\"2153.000\",\"2154.000\",\"2151.000\",\"2153.000\",\"28660\"],[\"2019-10-22 09:45:00\",\"2149.000\",\"2152.000\",\"2149.000\",\"2150.000\",\"30472\"],[\"2019-10-22 09:30:00\",\"2156.000\",\"2157.000\",\"2151.000\",\"2151.000\",\"38090\"],[\"2019-10-22 09:15:00\",\"2156.000\",\"2156.000\",\"2152.000\",\"2155.000\",\"72952\"],[\"2019-10-21 23:30:00\",\"2158.000\",\"2160.000\",\"2158.000\",\"2160.000\",\"20562\"],[\"2019-10-21 23:15:00\",\"2159.000\",\"2162.000\",\"2158.000\",\"2159.000\",\"32048\"],[\"2019-10-21 23:00:00\",\"2161.000\",\"2161.000\",\"2155.000\",\"2157.000\",\"52870\"],[\"2019-10-21 22:45:00\",\"2161.000\",\"2164.000\",\"2159.000\",\"2162.000\",\"53360\"],[\"2019-10-21 22:30:00\",\"2154.000\",\"2162.000\",\"2153.000\",\"2161.000\",\"72060\"],[\"2019-10-21 22:15:00\",\"2156.000\",\"2156.000\",\"2153.000\",\"2154.000\",\"45524\"],[\"2019-10-21 22:00:00\",\"2150.000\",\"2155.000\",\"2148.000\",\"2155.000\",\"56784\"],[\"2019-10-21 21:45:00\",\"2145.000\",\"2153.000\",\"2144.000\",\"2151.000\",\"86406\"],[\"2019-10-21 21:30:00\",\"2145.000\",\"2146.000\",\"2142.000\",\"2146.000\",\"60336\"],[\"2019-10-21 21:15:00\",\"2146.000\",\"2146.000\",\"2134.000\",\"2142.000\",\"210676\"],[\"2019-10-21 15:00:00\",\"2152.000\",\"2152.000\",\"2148.000\",\"2149.000\",\"55952\"],[\"2019-10-21 14:45:00\",\"2149.000\",\"2153.000\",\"2146.000\",\"2153.000\",\"38252\"],[\"2019-10-21 14:30:00\",\"2153.000\",\"2154.000\",\"2147.000\",\"2147.000\",\"36700\"],[\"2019-10-21 14:15:00\",\"2153.000\",\"2155.000\",\"2151.000\",\"2155.000\",\"25328\"],[\"2019-10-21 14:00:00\",\"2150.000\",\"2157.000\",\"2150.000\",\"2155.000\",\"66770\"],[\"2019-10-21 13:45:00\",\"2144.000\",\"2152.000\",\"2144.000\",\"2152.000\",\"47094\"],[\"2019-10-21 11:30:00\",\"2147.000\",\"2147.000\",\"2141.000\",\"2144.000\",\"42014\"],[\"2019-10-21 11:15:00\",\"2150.000\",\"2151.000\",\"2145.000\",\"2145.000\",\"31498\"],[\"2019-10-21 11:00:00\",\"2147.000\",\"2149.000\",\"2146.000\",\"2148.000\",\"29568\"],[\"2019-10-21 10:45:00\",\"2152.000\",\"2153.000\",\"2149.000\",\"2149.000\",\"23348\"],[\"2019-10-21 10:30:00\",\"2151.000\",\"2151.000\",\"2151.000\",\"2151.000\",\"44\"],[\"2019-10-21 10:15:00\",\"2151.000\",\"2152.000\",\"2149.000\",\"2151.000\",\"29754\"],[\"2019-10-21 10:00:00\",\"2151.000\",\"2153.000\",\"2148.000\",\"2148.000\",\"55246\"],[\"2019-10-21 09:45:00\",\"2144.000\",\"2148.000\",\"2139.000\",\"2148.000\",\"103584\"],[\"2019-10-21 09:30:00\",\"2154.000\",\"2154.000\",\"2145.000\",\"2145.000\",\"101722\"],[\"2019-10-21 09:15:00\",\"2162.000\",\"2163.000\",\"2148.000\",\"2149.000\",\"350132\"],[\"2019-10-18 23:30:00\",\"2192.000\",\"2193.000\",\"2190.000\",\"2191.000\",\"44158\"],[\"2019-10-18 23:15:00\",\"2195.000\",\"2195.000\",\"2193.000\",\"2193.000\",\"26682\"],[\"2019-10-18 23:00:00\",\"2191.000\",\"2196.000\",\"2191.000\",\"2196.000\",\"31440\"],[\"2019-10-18 22:45:00\",\"2194.000\",\"2196.000\",\"2190.000\",\"2191.000\",\"93816\"],[\"2019-10-18 22:30:00\",\"2200.000\",\"2204.000\",\"2196.000\",\"2197.000\",\"44366\"],[\"2019-10-18 22:15:00\",\"2204.000\",\"2205.000\",\"2200.000\",\"2201.000\",\"42032\"],[\"2019-10-18 22:00:00\",\"2197.000\",\"2203.000\",\"2197.000\",\"2200.000\",\"60898\"],[\"2019-10-18 21:45:00\",\"2192.000\",\"2200.000\",\"2191.000\",\"2199.000\",\"66174\"],[\"2019-10-18 21:30:00\",\"2191.000\",\"2193.000\",\"2188.000\",\"2192.000\",\"60360\"],[\"2019-10-18 21:15:00\",\"2205.000\",\"2205.000\",\"2189.000\",\"2193.000\",\"165440\"],[\"2019-10-18 15:00:00\",\"2203.000\",\"2204.000\",\"2201.000\",\"2202.000\",\"68622\"],[\"2019-10-18 14:45:00\",\"2205.000\",\"2208.000\",\"2201.000\",\"2205.000\",\"72332\"],[\"2019-10-18 14:30:00\",\"2195.000\",\"2208.000\",\"2194.000\",\"2208.000\",\"116010\"],[\"2019-10-18 14:15:00\",\"2194.000\",\"2196.000\",\"2193.000\",\"2195.000\",\"47254\"],[\"2019-10-18 14:00:00\",\"2191.000\",\"2193.000\",\"2187.000\",\"2193.000\",\"46458\"],[\"2019-10-18 13:45:00\",\"2196.000\",\"2196.000\",\"2192.000\",\"2192.000\",\"41182\"],[\"2019-10-18 11:30:00\",\"2193.000\",\"2195.000\",\"2189.000\",\"2195.000\",\"33582\"],[\"2019-10-18 11:15:00\",\"2190.000\",\"2194.000\",\"2188.000\",\"2193.000\",\"51408\"],[\"2019-10-18 11:00:00\",\"2190.000\",\"2190.000\",\"2185.000\",\"2188.000\",\"63360\"],[\"2019-10-18 10:45:00\",\"2191.000\",\"2193.000\",\"2189.000\",\"2190.000\",\"62546\"],[\"2019-10-18 10:30:00\",\"2193.000\",\"2193.000\",\"2193.000\",\"2193.000\",\"984\"],[\"2019-10-18 10:15:00\",\"2198.000\",\"2199.000\",\"2192.000\",\"2194.000\",\"53276\"],[\"2019-10-18 10:00:00\",\"2196.000\",\"2200.000\",\"2195.000\",\"2198.000\",\"43870\"],[\"2019-10-18 09:45:00\",\"2203.000\",\"2205.000\",\"2195.000\",\"2198.000\",\"86914\"],[\"2019-10-18 09:30:00\",\"2206.000\",\"2207.000\",\"2202.000\",\"2204.000\",\"55714\"],[\"2019-10-18 09:15:00\",\"2209.000\",\"2214.000\",\"2206.000\",\"2206.000\",\"96680\"],[\"2019-10-17 23:30:00\",\"2205.000\",\"2207.000\",\"2204.000\",\"2207.000\",\"20978\"],[\"2019-10-17 23:15:00\",\"2205.000\",\"2207.000\",\"2201.000\",\"2206.000\",\"34596\"],[\"2019-10-17 23:00:00\",\"2208.000\",\"2208.000\",\"2205.000\",\"2206.000\",\"20536\"],[\"2019-10-17 22:45:00\",\"2209.000\",\"2209.000\",\"2206.000\",\"2209.000\",\"20750\"],[\"2019-10-17 22:30:00\",\"2208.000\",\"2208.000\",\"2205.000\",\"2205.000\",\"33448\"],[\"2019-10-17 22:15:00\",\"2210.000\",\"2211.000\",\"2207.000\",\"2207.000\",\"38846\"],[\"2019-10-17 22:00:00\",\"2208.000\",\"2213.000\",\"2205.000\",\"2211.000\",\"74258\"],[\"2019-10-17 21:45:00\",\"2209.000\",\"2209.000\",\"2205.000\",\"2207.000\",\"37172\"],[\"2019-10-17 21:30:00\",\"2208.000\",\"2209.000\",\"2206.000\",\"2207.000\",\"60204\"],[\"2019-10-17 21:15:00\",\"2203.000\",\"2209.000\",\"2203.000\",\"2207.000\",\"140368\"],[\"2019-10-17 15:00:00\",\"2199.000\",\"2201.000\",\"2198.000\",\"2198.000\",\"60856\"],[\"2019-10-17 14:45:00\",\"2199.000\",\"2200.000\",\"2197.000\",\"2198.000\",\"55034\"],[\"2019-10-17 14:30:00\",\"2193.000\",\"2196.000\",\"2191.000\",\"2196.000\",\"39796\"],[\"2019-10-17 14:15:00\",\"2193.000\",\"2196.000\",\"2192.000\",\"2196.000\",\"36210\"],[\"2019-10-17 14:00:00\",\"2200.000\",\"2200.000\",\"2192.000\",\"2194.000\",\"55206\"],[\"2019-10-17 13:45:00\",\"2199.000\",\"2202.000\",\"2197.000\",\"2197.000\",\"36446\"],[\"2019-10-17 11:30:00\",\"2200.000\",\"2200.000\",\"2196.000\",\"2198.000\",\"30738\"],[\"2019-10-17 11:15:00\",\"2193.000\",\"2204.000\",\"2193.000\",\"2199.000\",\"67122\"],[\"2019-10-17 11:00:00\",\"2195.000\",\"2196.000\",\"2190.000\",\"2192.000\",\"59942\"],[\"2019-10-17 10:45:00\",\"2198.000\",\"2202.000\",\"2196.000\",\"2199.000\",\"47220\"],[\"2019-10-17 10:30:00\",\"2199.000\",\"2199.000\",\"2199.000\",\"2199.000\",\"10\"],[\"2019-10-17 10:15:00\",\"2197.000\",\"2201.000\",\"2197.000\",\"2200.000\",\"65460\"],[\"2019-10-17 10:00:00\",\"2190.000\",\"2197.000\",\"2188.000\",\"2196.000\",\"79346\"]]";
-		
+
 		data = data.replace("[[", "[").replace("]]", "]").replace("],[", "];[");
+
+		String[] dataArray = data.replace("\"", "").replace("[", "").split(";");
+		// for(String line:dataArray) {
+		// LOGGER.info(line);
+		// }
+
+		ArrayList<KEntity> list = new ArrayList<KEntity>();
+		for (int k = 0; k <= dataArray.length - 1; k++) {
+			int r = loadHisData(dataArray[k], "MA2001", 15, list);
+			if (r == 0) {// 无效数据
+				break;
+			}
+		}
+
+		// 跳过后面部分k线
+		int i = list.size() - 1;
+		int j = i;
+		for (; i >= 0; i--) {
+			if (list.get(i).getTime().contains("09:15:00")) {
+				j = i;
+				break;
+			}
+		}
+
+		// 进行半小时合并
+		ArrayList<KEntity> halfList = new ArrayList<KEntity>();
+
+		for (; i >= 0; i--) {
+			KEntity firstEntity = list.get(i);
+			if (i == 0) {
+				halfList.add(firstEntity);
+				break;
+			}
+			KEntity secondEntity = list.get(i - 1);
+			if (firstEntity.getTime().contains("23:30:00")
+					|| firstEntity.getTime().contains("23:00:00") && secondEntity.getTime().contains("09:15:00")) {
+				;// 晚上最后一根K线，不需要跟第二天的合并
+			} else {
+				firstEntity.setOpen(secondEntity.getOpen());
+				firstEntity.setHigh(firstEntity.getHigh() > secondEntity.getHigh() ? firstEntity.getHigh()
+						: secondEntity.getHigh());
+				firstEntity.setMin(
+						firstEntity.getMin() < secondEntity.getMin() ? firstEntity.getMin() : secondEntity.getMin());
+				firstEntity.setPreIndex(halfList.size() - 1);
+				i--;
+			}
+
+			try {
+				String time = firstEntity.getTime();
+				GregorianCalendar gc = new GregorianCalendar();
+				gc.setTime(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(time));
+				if (gc.get(Calendar.HOUR_OF_DAY) <= 15) {
+					long tt = gc.getTimeInMillis() - 15 * 1000 * 60;
+					gc.setTimeInMillis(tt);
+					firstEntity.setTime(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(gc.getTime()));
+				} else {
+					long tt = gc.getTimeInMillis() - 30 * 1000 * 60;
+					gc.setTimeInMillis(tt);
+					firstEntity.setTime(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(gc.getTime()));
+				}
+
+			} catch (ParseException e) {
+				LOGGER.error(e.getMessage(), e);
+			}
+			halfList.add(firstEntity);
+
+		}
+
+		System.out.println("=====================半小时=====================");
+		for (KEntity k : halfList) {
+			System.out.println(k.getTime());
+		}
+		System.out.println("=====================半小时=====================");
+
 		
-		String[] dataArray = data.replace("\"", "").replace("[","").split(";");
-		for(String line:dataArray) {
-			LOGGER.info(line);
+		// 进行1小时合并
+		// 跳过后面部分k线
+		i = list.size() - 1;
+		for (; i >= 0; i--) {
+			if (list.get(i).getTime().contains("21:15:00")) {
+				break;
+			}
+		}
+
+		
+		ArrayList<KEntity> hourList = new ArrayList<KEntity>();
+
+		for (; i >= 3; i--) {
+			KEntity firstEntity = list.get(i);
+			if(firstEntity.getTime().contains("15:00:00")) {
+				hourList.add(firstEntity);
+				try {
+					String time = firstEntity.getTime();
+					GregorianCalendar gc = new GregorianCalendar();
+					gc.setTime(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(time));
+					if (gc.get(Calendar.HOUR_OF_DAY) >= 15) {
+						long tt = gc.getTimeInMillis() - 15 * 1000 * 60;
+						gc.setTimeInMillis(tt);
+						firstEntity.setTime(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(gc.getTime()));
+					} else {
+						long tt = gc.getTimeInMillis() - 15 * 1000 * 60;
+						gc.setTimeInMillis(tt);
+						firstEntity.setTime(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(gc.getTime()));
+					}
+
+				} catch (ParseException e) {
+					LOGGER.error(e.getMessage(), e);
+				}
+				continue;
+			}
+			
+			KEntity secondEntity = list.get(i - 1);
+			KEntity thirdEntity = list.get(i - 2);
+			KEntity fourthEntity = list.get(i - 3);
+//			if (firstEntity.getTime().contains("23:30:00")
+//					|| firstEntity.getTime().contains("23:00:00") && secondEntity.getTime().contains("09:15:00")) {
+//				;// 晚上最后一根K线，不需要跟第二天的合并
+//			} else {
+//
+//			}
+			
+			firstEntity.setOpen(secondEntity.getOpen());
+			firstEntity.setHigh(firstEntity.getHigh() > secondEntity.getHigh() ? firstEntity.getHigh()
+					: secondEntity.getHigh());
+			firstEntity.setMin(
+					firstEntity.getMin() < secondEntity.getMin() ? firstEntity.getMin() : secondEntity.getMin());
+			firstEntity.setPreIndex(hourList.size() - 1);
+			i = i-3;
+
+			try {
+				String time = firstEntity.getTime();
+				GregorianCalendar gc = new GregorianCalendar();
+				gc.setTime(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(time));
+				if (gc.get(Calendar.HOUR_OF_DAY) >= 15) {
+					long tt = gc.getTimeInMillis() - 15 * 1000 * 60;
+					gc.setTimeInMillis(tt);
+					firstEntity.setTime(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(gc.getTime()));
+				} else {
+					long tt = gc.getTimeInMillis() - 15 * 1000 * 60;
+					gc.setTimeInMillis(tt);
+					firstEntity.setTime(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(gc.getTime()));
+				}
+
+			} catch (ParseException e) {
+				LOGGER.error(e.getMessage(), e);
+			}
+			// System.out.println("T1:" + firstEntity.getTime() + " T2" +
+			// secondEntity.getTime());
+			hourList.add(firstEntity);
+		}
+		
+		//合并最后一根小时K线，由最近几根15分钟线构成
+		System.out.println("=====================小时=====================");
+		for (KEntity k : hourList) {
+			System.out.println(k.getTime());
+		}
+		System.out.println("=====================小时=====================");
+
+	}
+	
+	/**到晚上23:00的有6根
+14:15:00[14:15:00,14:30:00,14:45:00,15:00:00]
+
+11:15:00[11:15:00,11:30:00,13:45:00,14:00:00]
+
+10:00:00[10:15:00,10:30:00,10:45:00,11:00:00]
+
+09:00:00[09:15:00,09:30:00,09:45:00,10:00:00]
+
+22:00:00[22:15:00,22:30:00,22:45:0023:00:00]
+
+21:00:00[21:15:00,21:30:00,21:45:00,22:00:00]
+
+遇到晚上23:30分的，有7根，对于这种情况还需要考虑周五没有交易的情况
+14:45:00[14:45:00,15:00:00]
+
+13:45:00[13:45:00,14:00:00,14:15:00,14:30:00]
+
+10:45:00[10:45:00,11:00:00,11:15:00,11:30:00]
+
+09:30:00[09:45:00,10:00:00,10:15:00,10:30:00]
+
+23:00:00[23:15:00,23:30:00,09:15:00,09:30:00]==============如果前一天晚上无行情，则只有[09:15:00,09:30:00]，且时间设置为前一天
+
+22:00:00[22:15:00,22:30:00,22:45:00,23:00:00]
+
+21:00:00[21:15:00,21:30:00,21:45:00,22:00:00]
+
+算法：
+23:00情况
+1、遇到21:15，开始合并，每4个合并成一个（合并按照最大、最小、时间、下标几个维度考虑）
+2、遇到15:00结束，并开始下一轮
+3、遇到只剩不到4个15分钟情况，则直接进行合并
+4、每轮合并后时间设置【21:00:00,22:00:00,09:00:00,10:00:00,11:15:00,14:15:00】
+
+23:30情况
+1、每一轮遇到21:15情况，开始合并，每4个合并成一个，遇到14:15:00则两个合并（合并按照最大、最小、时间、下标几个维度考虑）
+2、如果新的一轮遇到09:15情况，开始2个即合并，其他的4个合并
+3、遇到15:00结束，并开始下一轮
+4、遇到只剩不到4个15分钟情况，则直接进行合并
+5、每轮合并后时间设置【21:00:00,22:00:00,23:00:00,09:30:00,10:45:00,13:45:00,14:45:00】
+
+15:00情况（无夜）
+与23:00类似，只不过没有晚上数据
+	 * @param args
+	 */
+	
+	
+
+
+	// 因为新浪历史数据接口，日线数据和其他时间框架数据的前后顺序不一样，所以遍历一个从前到后
+	/**
+	 * 
+	 * @param data
+	 * @param name
+	 * @param min
+	 * @param list
+	 * @return
+	 */
+	private static int loadHisData(String data, String name, int min, ArrayList<KEntity> list) {
+
+		String[] infos = data.split(",");
+		if (infos[0].length() < 11) {
+			infos[0] = infos[0] + " 00:00:00";
+		}
+		// 如果现在是15:00-00:00，则取日期为今天且时间为15:00:00之前的数据
+		// 如果现在是00:00-15:00，则取日期为前一天，且时间为15:00之前的数据
+		int hour = 时间工具.获得现在小时();
+		String stopTime = 时间工具.获得今日日期() + " 15:00:00";
+		if (hour < 15) {
+			stopTime = 时间工具.取得前一交易日期() + " 15:00:00";
+		} else {
+			stopTime = 时间工具.获得今日日期() + " 15:00:00";
+		}
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		try {
+			Date skipTime = sdf.parse(stopTime);
+			// System.out.println("￥￥￥￥￥："+infos[0]);
+			Date dataTime = sdf.parse(infos[0]);
+			// System.out.println(stopTime+" "+infos[0]);
+			if (dataTime.getTime() > skipTime.getTime()) {
+				// break;
+				// return 0;
+			}
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+			LOGGER.error(e.getMessage(), e);
+		}
+		String tp = getTpFromName(name);
+		KEntity kEntity = new KEntity();
+		kEntity.setTP(tp);
+		kEntity.setName(name);
+		kEntity.setMin(min);
+		kEntity.setTime(infos[0]);
+		kEntity.setOpen(Double.parseDouble(infos[1]));
+		kEntity.setHigh(Double.parseDouble(infos[2]));
+		kEntity.setLow(Double.parseDouble(infos[3]));
+		kEntity.setClose(Double.parseDouble(infos[4]));
+		kEntity.setPreIndex(list.size() - 1);
+		
+		//需判断对应品种是否到23:30
+		int type = getType(name);
+
+		if (min == 15 && infos[0].contains("10:30:00")) {
+			// 把10:30:00这根K线去掉
+		} else if(type == 1 && min == 15 && infos[0].contains("23:15:00")) {
+			// 把23:15:00这根去掉
+			//因为没有到23:15:00
+		} else if(type == 2 && min == 15 && infos[0].contains("23:45:00")) {
+			// 把23:45:00这根去掉
+			//因为没有到23:45:00
+		} else {
+			list.add(kEntity);
+		}
+
+		return 1;
+	}
+	
+	
+	private static final String TYPE0 = "JD0,DF0";
+	private static final String TYPE1 = "BU0,I0";
+	private static final String TYPE2 = "MA0,M0";
+	/**
+	 * 
+	 * @param codeName
+	 * @return 返回类型：0(只在白天交易)、1（交易到23:00）、2（交易到23:30），交易时间
+	 */
+	public static int getType(String codeName) {
+		
+		if(TYPE0.contains(codeName.toUpperCase().replaceAll("[0-9]+", "0"))) {
+			return 0;
+		}else if(TYPE1.contains(codeName.toUpperCase().replaceAll("[0-9]+", "0"))) {
+			return 1;
+		}
+		return 2;
+	}
+	
+	public static ArrayList<KEntity> mergeTohalf() {
+		return null;
+	}
+	
+	public static ArrayList<KEntity> mergeToHour(ArrayList<KEntity> fiftenList) {
+		ArrayList<KEntity> list = new ArrayList<>();
+		if(fiftenList == null || fiftenList.size() ==0) {
+			return list;
+		}
+		String name = fiftenList.get(0).getName();
+		int type = getType(name);
+		if(type == 0) {
+			//1.只有白天
+			mergeToHourType0(fiftenList, list);
+		} else if (type ==1) {
+			//2.到晚上23:00
+			mergeToHourType1(fiftenList, list);
+		} else {
+			//3.到晚上23:30
+			mergeToHourType2(fiftenList, list);
+		}
+		
+		return list;
+	}
+	
+	private static  KEntity mergeMuilt(KEntity ... args) {
+		KEntity newKEntity = (KEntity) args[0];
+		newKEntity.setMin(60);
+		for(KEntity k:args) {
+			if(newKEntity.getHigh() < k.getHigh()) {
+				newKEntity.setHigh(k.getHigh());
+			}
+			if(newKEntity.getLow() > k.getLow()) {
+				newKEntity.setLow(k.getLow());
+			}
+		}
+		newKEntity.setClose(args[args.length-1].getClose());
+		return newKEntity;
+	}
+	
+	/**
+14:15:00[14:15:00,14:30:00,14:45:00,15:00:00]
+
+11:15:00[11:15:00,11:30:00,13:45:00,14:00:00]
+
+10:00:00[10:15:00,10:30:00,10:45:00,11:00:00]
+
+09:00:00[09:15:00,09:30:00,09:45:00,10:00:00]
+	 * @param fiftenList
+	 * @param hourList
+	 */
+	
+	private static void mergeToHourType0(ArrayList<KEntity> fiftenList, ArrayList<KEntity> hourList) {
+		// 进行1小时合并
+		// 跳过后面部分k线
+		int i = fiftenList.size() - 1;
+		for (; i >= 0; i--) {
+			if (fiftenList.get(i).getTime().contains("09:15:00")) {
+				break;
+			}
+		}
+		//组装所有历史数据
+		for(; i >= 3; i-=4) {
+			KEntity newKEntity = mergeMuilt(fiftenList.get(i), fiftenList.get(i-1), fiftenList.get(i-2), fiftenList.get(i-3));
+			newKEntity.setPreIndex(hourList.size()-1);
+			String time = newKEntity.getTime();
+			newKEntity.setTime(time.replace("09:15:00", "09:00:00").replace("10:15:00", "10:00:00").replace("11:15:00", "11:15:00").replace("14:15:00", "14:15:00"));
+			hourList.add(newKEntity);
+		}
+		//组装最近一根
+		if(i>0) {
+			KEntity[] kArray=new KEntity[i + 1]; 
+			for(; i>=0; i--) {
+				kArray[i] = fiftenList.get(i);
+			}
+			KEntity newKEntity = mergeMuilt(kArray);
+			String time = newKEntity.getTime();
+			newKEntity.setTime(time.replace("09:15:00", "09:00:00").replace("10:15:00", "10:00:00").replace("11:15:00", "11:15:00").replace("14:15:00", "14:15:00"));
+			newKEntity.setPreIndex(hourList.size()-1);
+			hourList.add(newKEntity);
+		}
+		
+	}
+	private static void mergeToHourType1(ArrayList<KEntity> fiftenList, ArrayList<KEntity> hourList) {
+		// 进行1小时合并
+		// 跳过后面部分k线
+		int i = fiftenList.size() - 1;
+		for (; i >= 0; i--) {
+			if (fiftenList.get(i).getTime().contains("21:15:00")) {
+				break;
+			}
+		}
+		
+		//组装所有历史数据
+		for(; i >= 3; i-=4) {
+			KEntity newKEntity = mergeMuilt(fiftenList.get(i), fiftenList.get(i-1), fiftenList.get(i-2), fiftenList.get(i-3));
+			newKEntity.setPreIndex(hourList.size()-1);
+			String time = newKEntity.getTime();
+			newKEntity.setTime(time.replace("09:15:00", "09:00:00").replace("10:15:00", "10:00:00").replace("11:15:00", "11:15:00").replace("14:15:00", "14:15:00").replace("22:15:00", "22:00:00").replace("21:15:00", "21:00:00"));
+			hourList.add(newKEntity);
+		}
+		//组装最近一根
+		if(i>0) {
+			KEntity[] kArray=new KEntity[i + 1]; 
+			for(; i>=0; i--) {
+				kArray[i] = fiftenList.get(i);
+			}
+			KEntity newKEntity = mergeMuilt(kArray);
+			String time = newKEntity.getTime();
+			newKEntity.setTime(time.replace("09:15:00", "09:00:00").replace("10:15:00", "10:00:00").replace("11:15:00", "11:15:00").replace("14:15:00", "14:15:00").replace("22:15:00", "22:00:00").replace("21:15:00", "21:00:00"));
+			newKEntity.setPreIndex(hourList.size()-1);
+			hourList.add(newKEntity);
 		}
 		
 		
+	}
+	
+	/**
+14:45:00[14:45:00,15:00:00]
+
+13:45:00[13:45:00,14:00:00,14:15:00,14:30:00]
+
+10:45:00[10:45:00,11:00:00,11:15:00,11:30:00]
+
+09:30:00[09:45:00,10:00:00,10:15:00,10:30:00]
+
+23:00:00[23:15:00,23:30:00,09:15:00,09:30:00]==============如果前一天晚上无行情，则只有[09:15:00,09:30:00]，且时间设置为前一天
+
+22:00:00[22:15:00,22:30:00,22:45:00,23:00:00]
+
+21:00:00[21:15:00,21:30:00,21:45:00,22:00:00]
+	 * @param fiftenList
+	 * @param hourList
+	 */
+	private static void mergeToHourType2(ArrayList<KEntity> fiftenList, ArrayList<KEntity> hourList) {
+		// 进行1小时合并
+		// 跳过后面部分k线
+		int i = fiftenList.size() - 1;
+		for (; i >= 0; i--) {
+			if (fiftenList.get(i).getTime().contains("21:15:00")) {
+				break;
+			}
+		}
+		
+		//组装所有历史数据
+		for(; i >= 3; ) {
+			KEntity tempEntity = fiftenList.get(i);
+			
+			if(!tempEntity.getTime().contains("09:15:00") && !tempEntity.getTime().contains("14:45:00")) {
+				//23:15:00,23:30:00以及其他情况
+				KEntity newKEntity = mergeMuilt(fiftenList.get(i), fiftenList.get(i-1), fiftenList.get(i-2), fiftenList.get(i-3));
+				newKEntity.setPreIndex(hourList.size()-1);
+				String time = newKEntity.getTime();
+				newKEntity.setTime(time.replace("09:45:00", "09:30:00").replace("21:15:00", "21:00:00").replace("22:15:00", "22:00:00").replace("23:15:00", "23:00:00"));
+				hourList.add(newKEntity);
+				i-=4;
+			} else {
+				//09:15:00(无夜盘),14:45:00(最后半小时)
+				KEntity newKEntity = mergeMuilt(fiftenList.get(i), fiftenList.get(i-1));
+				newKEntity.setPreIndex(hourList.size()-1);
+				String time = newKEntity.getTime();
+				newKEntity.setTime(time.replace("09:45:00", "09:30:00").replace("21:15:00", "21:00:00").replace("22:15:00", "22:00:00").replace("23:15:00", "23:00:00"));
+				hourList.add(newKEntity);
+				i-=2;
+			}
+			
+		}
+		//组装最近一根
+		if(i>0) {
+			KEntity[] kArray=new KEntity[i + 1]; 
+			for(; i>=0; i--) {
+				kArray[i] = fiftenList.get(i);
+			}
+			KEntity newKEntity = mergeMuilt(kArray);
+			String time = newKEntity.getTime();
+			newKEntity.setTime(time.replace("09:45:00", "09:30:00").replace("21:15:00", "21:00:00").replace("22:15:00", "22:00:00").replace("23:15:00", "23:00:00"));
+			newKEntity.setPreIndex(hourList.size()-1);
+			hourList.add(newKEntity);
+		}
+	}
+	
+	public static void main(String[] args) {
+		ArrayList<KEntity> fiftenList = loadHisMinData("BU0", 15);
+//		for(KEntity k : fiftenList) {
+//			System.out.println(k.getTime());
+//		}
+		
+		ArrayList<KEntity> hourList = mergeToHour(fiftenList);
+		
+		for(KEntity k : hourList) {
+			System.out.println(k.getTime());
+		}
+		
 		
 	}
-
-
-
-
-	
-	
-
 
 }

@@ -7,7 +7,7 @@ import java.io.Serializable;
  * @author houxinyu
  *
  */
-public class KEntity implements Serializable{
+public class KEntity implements Serializable, Cloneable{
 	//TP,name,time,devTime,min,open,high,low,close,dif,dea,macd,shortEma,midEma,longEma,crossType,deviateType,WMType,preIndex,addMin
 	private String TP;//交易所 Trading Places
 	private String name;//M0,M1701,RM1609等等
