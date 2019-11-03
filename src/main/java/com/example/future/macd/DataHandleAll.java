@@ -6,12 +6,17 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import org.apache.http.HttpResponse;
+import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.example.future.config.FutureConfig;
+import com.example.future.tools.HttpUtils;
 import com.example.future.tools.时间工具;
 
 /**
@@ -805,7 +810,7 @@ public class DataHandleAll {
 
 09:00:00[09:15:00,09:30:00,09:45:00,10:00:00]
 
-22:00:00[22:15:00,22:30:00,22:45:0023:00:00]
+22:00:00[22:15:00,22:30:00,22:45:00,23:00:00]
 
 21:00:00[21:15:00,21:30:00,21:45:00,22:00:00]
 
@@ -899,9 +904,10 @@ public class DataHandleAll {
 		//需判断对应品种是否到23:30
 		int type = getType(name);
 
-		if (min == 15 && infos[0].contains("10:30:00")) {
-			// 把10:30:00这根K线去掉
-		} else if(type == 1 && min == 15 && infos[0].contains("23:15:00")) {
+//		if (min == 15 && infos[0].contains("10:30:00")) {
+//			// 把10:30:00这根K线去掉
+//		} else 
+		if(type == 1 && min == 15 && infos[0].contains("23:15:00")) {
 			// 把23:15:00这根去掉
 			//因为没有到23:15:00
 		} else if(type == 2 && min == 15 && infos[0].contains("23:45:00")) {
@@ -946,12 +952,15 @@ public class DataHandleAll {
 		int type = getType(name);
 		if(type == 0) {
 			//1.只有白天
+			System.out.println("1.只有白天");
 			mergeToHourType0(fiftenList, list);
 		} else if (type ==1) {
 			//2.到晚上23:00
+			System.out.println("2.到晚上23:00");
 			mergeToHourType1(fiftenList, list);
 		} else {
 			//3.到晚上23:30
+			System.out.println("3.到晚上23:30");
 			mergeToHourType2(fiftenList, list);
 		}
 		
@@ -959,7 +968,7 @@ public class DataHandleAll {
 	}
 	
 	private static  KEntity mergeMuilt(KEntity ... args) {
-		KEntity newKEntity = (KEntity) args[0];
+		KEntity newKEntity = (KEntity) args[0].clone();
 		newKEntity.setMin(60);
 		for(KEntity k:args) {
 			if(newKEntity.getHigh() < k.getHigh()) {
@@ -1016,36 +1025,60 @@ public class DataHandleAll {
 		}
 		
 	}
+	
+	/**
+14:15:00[14:15:00,14:30:00,14:45:00,15:00:00]
+
+11:15:00[11:15:00,11:30:00,13:45:00,14:00:00]
+
+10:00:00[10:15:00,10:30:00,10:45:00,11:00:00]
+
+09:00:00[09:15:00,09:30:00,09:45:00,10:00:00]
+
+22:00:00[22:15:00,22:30:00,22:45:00,23:00:00]
+
+21:00:00[21:15:00,21:30:00,21:45:00,22:00:00]
+	 * @param fiftenList
+	 * @param hourList
+	 */
 	private static void mergeToHourType1(ArrayList<KEntity> fiftenList, ArrayList<KEntity> hourList) {
 		// 进行1小时合并
 		// 跳过后面部分k线
-		int i = fiftenList.size() - 1;
-		for (; i >= 0; i--) {
+//		int i = fiftenList.size() - 1;
+		
+		int i =0;
+		for (; i <= fiftenList.size(); i++) {
 			if (fiftenList.get(i).getTime().contains("21:15:00")) {
 				break;
 			}
 		}
 		
 		//组装所有历史数据
-		for(; i >= 3; i-=4) {
-			KEntity newKEntity = mergeMuilt(fiftenList.get(i), fiftenList.get(i-1), fiftenList.get(i-2), fiftenList.get(i-3));
+		for(; i <= fiftenList.size() - 4; i+=4) {
+			KEntity newKEntity = mergeMuilt(fiftenList.get(i), fiftenList.get(i+1), fiftenList.get(i+2), fiftenList.get(i+3));
 			newKEntity.setPreIndex(hourList.size()-1);
 			String time = newKEntity.getTime();
 			newKEntity.setTime(time.replace("09:15:00", "09:00:00").replace("10:15:00", "10:00:00").replace("11:15:00", "11:15:00").replace("14:15:00", "14:15:00").replace("22:15:00", "22:00:00").replace("21:15:00", "21:00:00"));
+			System.out.println("时间:" + newKEntity.getTime() + "[" + fiftenList.get(i).getTime() + "," +fiftenList.get(i+1).getTime()+","+fiftenList.get(i+2).getTime()+"," + fiftenList.get(i+3).getTime()+"]");
 			hourList.add(newKEntity);
 		}
 		//组装最近一根
-		if(i>0) {
-			KEntity[] kArray=new KEntity[i + 1]; 
-			for(; i>=0; i--) {
-				kArray[i] = fiftenList.get(i);
-			}
-			KEntity newKEntity = mergeMuilt(kArray);
-			String time = newKEntity.getTime();
-			newKEntity.setTime(time.replace("09:15:00", "09:00:00").replace("10:15:00", "10:00:00").replace("11:15:00", "11:15:00").replace("14:15:00", "14:15:00").replace("22:15:00", "22:00:00").replace("21:15:00", "21:00:00"));
-			newKEntity.setPreIndex(hourList.size()-1);
-			hourList.add(newKEntity);
-		}
+//		System.out.println("fiftenList.size():" + fiftenList.size()  + " i:" + i);
+//		if(i<fiftenList.size()) {
+//			KEntity[] kArray=new KEntity[fiftenList.size() - i]; 
+//			StringBuffer tt = new StringBuffer();
+//			for(; i<fiftenList.size(); i++) {
+//				System.out.println(">>>>>i:" + i + " fiftenList.size():" + fiftenList.size() + " kArray:" + kArray.length);
+//				kArray[i] = fiftenList.get(i);
+//				tt.append(fiftenList.get(i).getTime() + (i==fiftenList.size()-1?"":","));
+//			}
+//			KEntity newKEntity = mergeMuilt(kArray);
+//			String time = newKEntity.getTime();
+//			newKEntity.setPreIndex(hourList.size()-1);
+//			newKEntity.setTime(time.replace("09:15:00", "09:00:00").replace("10:15:00", "10:00:00").replace("11:15:00", "11:15:00").replace("14:15:00", "14:15:00").replace("22:15:00", "22:00:00").replace("21:15:00", "21:00:00"));
+//			System.out.println("时间:" + newKEntity.getTime() + "[" + fiftenList.get(i).getTime() + "," +fiftenList.get(i+1).getTime()+","+fiftenList.get(i+2).getTime()+"," + fiftenList.get(i+3).getTime()+"]");
+//			hourList.add(newKEntity);
+//		}
 		
 		
 	}
@@ -1114,18 +1147,106 @@ public class DataHandleAll {
 		}
 	}
 	
+	//获取实时数据
+	public static void getRealTimeData(String symbol) {
+	    String host = "http://alirm-com.konpn.com";
+	    String path = "/query/com";
+	    String method = "GET";
+	    String appcode = "354bf12bd6904c0cbc5de7c828aa7fdf";
+	    Map<String, String> headers = new HashMap<String, String>();
+	    //最后在header中的格式(中间是英文空格)为Authorization:APPCODE 83359fd73fe94948385f570e3c139105
+	    headers.put("Authorization", "APPCODE " + appcode);
+	    Map<String, String> querys = new HashMap<String, String>();
+//	    querys.put("symbol", "CZCEMA2001");
+	    querys.put("symbol", symbol);
+	    querys.put("withks", "1");
+	    //withks=1&withticks=0
+
+
+	    try {
+	    	/**
+	    	* 重要提示如下:
+	    	* HttpUtils请从
+	    	* https://github.com/aliyun/api-gateway-demo-sign-java/blob/master/src/main/java/com/aliyun/api/gateway/demo/util/HttpUtils.java
+	    	* 下载
+	    	*
+	    	* 相应的依赖请参照
+	    	* https://github.com/aliyun/api-gateway-demo-sign-java/blob/master/pom.xml
+	    	*/
+	    	HttpResponse response = HttpUtils.doGet(host, path, method, headers, querys);
+	    	//System.out.println(response.toString());
+	    	//获取response的body
+	    	System.out.println(EntityUtils.toString(response.getEntity()));
+	    } catch (Exception e) {
+	    	e.printStackTrace();
+	    }
+	}
+	
+	//1、获取历史数据,且带最近一次有效数据
+	//2、小时线，按照4根15分支合并，半小时按照2根15分钟合并
+	//3、时间都是以最新一根为准
+	//4、每天启动时，先请求一次第二页的数据，保存起来，使用pidx=2,psize=400,保证与第一页有重叠，避免今天的数据请求时与之前出现中间数据丢失
+	//5、每15分钟请求一次，根据不同产品进行预警
+	/**
+	 * 
+	 * @param symbol STRING	必选	品种代码,参考列表
+	 * @param period STRING	必选	取 1M,5M,10M,15M,30M,1H,2H,4H,D,W,M。部分品种无W,M
+	 * @param pidx INT	必选	页码,排序是从当前往历史方向排,第一页是当前处。接口输出的日周期数据只有最近2年，分钟周期数据只有最近10天(更多历史数据可申请打包下载)。
+	 * @param psize INT	可选	每页最多500个数据
+	 * @param withlast INT	可选	是否包含最新的一个动态k线数据，第一页有效
+	 */
+	public static void getHistoryData(String symbol,String period, int pidx, int psize, int withlast) {
+	    String host = "http://alirm-com.konpn.com";
+	    String path = "/query/comkm";
+	    String method = "GET";
+	    String appcode = "354bf12bd6904c0cbc5de7c828aa7fdf";
+	    Map<String, String> headers = new HashMap<String, String>();
+	    //最后在header中的格式(中间是英文空格)为Authorization:APPCODE 83359fd73fe94948385f570e3c139105
+	    headers.put("Authorization", "APPCODE " + appcode);
+	    Map<String, String> querys = new HashMap<String, String>();
+//	    querys.put("symbol", "CZCEMA2001");
+	    querys.put("symbol", symbol);
+	    querys.put("period",period);
+	    querys.put("pidx",pidx+"");
+	    querys.put("psize",psize+"");
+	    querys.put("withlast",withlast+"");
+	    //withks=1&withticks=0
+
+
+	    try {
+	    	HttpResponse response = HttpUtils.doGet(host, path, method, headers, querys);
+	    	//System.out.println(response.toString());
+	    	//获取response的body
+	    	System.out.println(EntityUtils.toString(response.getEntity()));
+	    } catch (Exception e) {
+	    	e.printStackTrace();
+	    }
+	}
+	
+	
 	public static void main(String[] args) {
 		ArrayList<KEntity> fiftenList = loadHisMinData("BU0", 15);
 //		for(KEntity k : fiftenList) {
 //			System.out.println(k.getTime());
 //		}
 		
-		ArrayList<KEntity> hourList = mergeToHour(fiftenList);
-		
-		for(KEntity k : hourList) {
-			System.out.println(k.getTime());
+		for(int i=0; i<fiftenList.size(); i++) {
+			System.out.println(fiftenList.get(i).getTime());
 		}
 		
+		ArrayList<KEntity> hourList = mergeToHour(fiftenList);
+		
+//		for(KEntity k : hourList) {
+//			System.out.println(k.getTime());
+//		}
+		
+		System.out.println("b989a1cbca344410bdf6ba8665fedb06".toUpperCase());
+		
+//		getRealTimeData("CZCEMA2001");
+//		
+//		getHistoryData("CZCEMA2001", "30M", 1, 200, 1);
+		
+		getHistoryData("CZCEMA2001", "15M", 1, 500, 1);
 		
 	}
 

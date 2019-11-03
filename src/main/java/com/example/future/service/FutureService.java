@@ -8,6 +8,8 @@ public interface FutureService {
 	
 	public  ArrayList<String> futureAlertFiveMin();
 	
-	public  ArrayList<String> futureAlert(int min);
+	public  ArrayList<String> futureAlertDay(int min, int type);
+	
+	public  ArrayList<String> futureAlert(int min, int type);
 
 }

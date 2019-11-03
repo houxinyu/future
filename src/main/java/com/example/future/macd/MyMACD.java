@@ -232,7 +232,8 @@ public class MyMACD {
 		kEntity.setDea(dea);
 		kEntity.setMacd(macd);
 		setCrossType(kEntity,list);
-		setDeviateType(kEntity,list);
+		//bug to fix:死循环
+		//setDeviateType(kEntity,list);
 	}
 	
 	//均线预警系统涉及MACD中DIF与五日均线同向的问题，采用默认周期
@@ -261,15 +262,14 @@ public class MyMACD {
 	//均线预警系统涉及MACD中DIF与五日均线同向的问题
 	public static void setMACD(ArrayList<KEntity> list,int shortPeriod,int longPeriod,int midPeriod){
 		int n=0;//只计算最近的数据
-		if(list.size()>cSize){
-			n=list.size()-cSize;
-		}
+//		if(list.size()>cSize){
+//			n=list.size()-cSize;
+//		}
 		for(int i=n;i<list.size();i++){
 			//经过这样的判断之后，之前已经计算过的值就不做重新计算，只有最后一个entity的值要根据最新价格进行重新计算
 			if((list.get(i).getDif()+"").equals("0.0")&&(list.get(i).getDea()+"").equals("0.0")||(i==list.size()-1)){
 				MyMACD.setMACD(list.get(i),list, shortPeriod, longPeriod, midPeriod);
 			}
-			
 		}
 	}
 

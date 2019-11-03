@@ -348,5 +348,39 @@ public class KEntity implements Serializable, Cloneable{
 	}
 
 
+	@Override  
+    public Object clone() {
+		KEntity k = new KEntity();
+		k.setAddMin(this.getAddMin());
+		k.setClose(this.getClose());
+		k.setCrossType(this.getCrossType());
+		k.setDea(this.getDea());
+		k.setDeviateType(this.getDeviateType());
+		k.setDevTime(this.devTime);
+		k.setDif(this.dif);
+		k.setHigh(this.getHigh());
+		k.setLongEma(this.longEma);
+		k.setLow(this.low);
+		k.setMA10(this.MA10);
+		k.setMA120(this.MA120);
+		k.setMA20(this.MA20);
+		k.setMA3(this.MA3);
+		k.setMA30(this.MA30);
+		k.setMA40(this.MA40);
+		k.setMA5(this.MA5);
+		k.setMA60(this.MA60);
+		k.setMacd(this.macd);
+		k.setMidEma(this.midEma);
+		k.setMin(this.min);
+		k.setName(this.name);
+		k.setOpen(this.open);
+		k.setPreIndex(this.preIndex);
+		k.setShortEma(this.shortEma);
+		k.setTime(this.time);
+		k.setTP(this.TP);
+		k.setWMType(this.WMType);
+				
+		return k; 
+	}
 
 }
