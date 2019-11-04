@@ -459,7 +459,8 @@ public class DataHandleApi {
 			if(symbol.getInteger("Type") == type) {
 				ArrayList<KEntity> list = AlertUtil.getListFromMap(symbol.getString("Symbol") + min);
 				if (list != null && list.size() != 0) {
-					MyMA.setMA(list, 20);
+//					MyMA.setMA(list, 20);
+					MyMA.setMA(list, 26);
 					MyMACD.setMACD(list);
 				}
 			}
@@ -486,6 +487,12 @@ public class DataHandleApi {
 							&& preEntity.getMacd() < todayEntity.getMacd() && todayEntity.getMacd() < 0;
 					boolean 红转 = preEntity.getDea() < 0 && preEntity.getMacd() > ppEntity.getMacd()
 							&& preEntity.getMacd() > todayEntity.getMacd() && todayEntity.getMacd() > 0;
+					
+					//30分钟的，只接受在一侧的预警，如果后续发现1小时的信号也太多，那也采用该限制，尽量做最好的信号
+					if(min == 30) {
+						绿转 = 绿转 && todayEntity.getClose()>todayEntity.getMAn(26);
+						红转 = 红转 && todayEntity.getClose()<todayEntity.getMAn(26);
+					}
 
 					if (绿转 || 红转) {
 						LOGGER.info("======================================================================");
@@ -699,16 +706,16 @@ public class DataHandleApi {
 		
 		
 		//day
-		int type = 2;
+		int type = 0;
 		loadHistoryData("D", type);
 		caculateMACD(3600, type);
 		ArrayList<String> list = caculateAlert(3600, type);
 		System.out.println("list:" + list);
 		
-//		ArrayList<KEntity> dayList = AlertUtil.getListFromMap(testSymbol+3600);
-//		for(KEntity k:dayList) {
-//			System.out.println(k.getTime() + "[" + k + "]");
-//		}
+		ArrayList<KEntity> dayList = AlertUtil.getListFromMap(testSymbol+3600);
+		for(KEntity k:dayList) {
+			System.out.println(k.getTime() + "[" + k + "]");
+		}
 		
 		
 //		type = 1;

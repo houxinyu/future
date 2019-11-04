@@ -41,6 +41,37 @@ public class FutureSchedule {
 	
 	private Map<String,String> map = new HashMap<>();
 	
+	//30分钟预警
+    //@Scheduled(cron="0 28,58 21,22 ? * MON-FRI")
+    public void alertFor30_1(){
+    	alert(30, 0);
+    	alert(30, 1);
+    	alert(30, 2);
+    }
+    //@Scheduled(cron="0 28 23 ? * MON-FRI")
+    public void alertFor30_2(){
+    	alert(30, 2);
+    }
+    //@Scheduled(cron="0 28,58 9 ? * MON-FRI")
+    public void alertFor30_3(){
+    	alert(30, 0);
+    	alert(30, 1);
+    	alert(30, 2);
+    }
+    //@Scheduled(cron="0 43 10,13,14 ? * MON-FRI")
+    public void alertFor30_4(){
+    	alert(30, 0);
+    	alert(30, 1);
+    	alert(30, 2);
+    }
+    //@Scheduled(cron="0 13 11,13,14 ? * MON-FRI")
+    public void alertFor30_5(){
+    	alert(30, 0);
+    	alert(30, 1);
+    	alert(30, 2);
+    }
+    
+    
 	
 	//1小时测试
 //    @Scheduled(cron="30 11 14 ? * *")
