@@ -43,10 +43,15 @@ public class FutureSchedule {
 	
 	
 	//1小时测试
-    //@Scheduled(cron="30 44 13 ? * *")
+//    @Scheduled(cron="30 11 14 ? * *")
     public void alertFor60_test(){
+    	alert(60, 0);
     	alert(60, 1);
+    	alert(60, 2);
     }
+    
+    //晚上：21:58,22:58,
+    //白天：09:28,09:58,10:43,11:13,13:43,
     
     //60分钟预警type2
     @Scheduled(cron="0 58 21,22,14 ? * MON-FRI")
@@ -95,7 +100,7 @@ public class FutureSchedule {
     
   
     //day预警type0,type1,type2
-    @Scheduled(cron="0 45 14 ? * MON-FRI")
+    @Scheduled(cron="0 50 14 ? * MON-FRI")
     public void alertForDay(){
     	alertDay(3600, 0);
     	alertDay(3600, 1);
@@ -103,6 +108,7 @@ public class FutureSchedule {
     }
     
     /**
+     * 考虑到信号比较多，后续会对信号进行筛选，只有那些柱子比较少，或者只在中轨一侧的信号才进行预警，尤其是30分钟的信号。
      * @param min
      */
     public void alert(int min, int type){

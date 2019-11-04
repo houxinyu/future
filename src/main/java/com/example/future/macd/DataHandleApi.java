@@ -178,10 +178,8 @@ public class DataHandleApi {
 				if(fiftenList != null && fiftenList.size()>0) {
 					if(min == 30) {
 						ArrayList<KEntity> halfList = new ArrayList<>();
-						//暂未实现
-
+						mergeHalfHourData(fiftenList,halfList);
 						AlertUtil.putListToMap(halfList.get(0).getName() + "30", fiftenList);
-						throw new RuntimeException("功能暂未实现！");
 					} else if (min == 60) {
 						ArrayList<KEntity> hourList = new ArrayList<>();
 						mergeHourData(fiftenList, hourList, cacheList);
@@ -193,6 +191,34 @@ public class DataHandleApi {
 			}
 			
 		}
+	}
+	
+	
+	public static void mergeHalfHourData(ArrayList<KEntity> fiftenList, ArrayList<KEntity> halfHourList) {
+		// 进行半小时合并，只需两根两根合并就ok
+				// 跳过后面部分k线
+				int i = fiftenList.size() - 1;
+				for (; i >= 0; i--) {
+					if (fiftenList.get(i).getTime().contains("09:00:00")) {
+						break;
+					}
+				}
+				
+				
+				//组装所有历史数据
+				for(; i >= 0;) {
+					KEntity newKEntity;
+					if(i ==0) {
+						newKEntity = mergeMuilt(fiftenList.get(i));
+						i -=1;
+					}else {
+						newKEntity = mergeMuilt(fiftenList.get(i), fiftenList.get(i-1));
+						i-=2;
+					}
+					newKEntity.setPreIndex(halfHourList.size()-1);
+					newKEntity.setMin(30);
+					halfHourList.add(newKEntity);
+				}
 	}
 	
 	public static void mergeHourData(ArrayList<KEntity> fiftenList, ArrayList<KEntity> hourList, ArrayList<KEntity> cacheList) {
