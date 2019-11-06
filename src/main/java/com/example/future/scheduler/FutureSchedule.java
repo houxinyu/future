@@ -123,7 +123,7 @@ public class FutureSchedule {
     
     
    //day预警type0,type1,type2
-    @Scheduled(cron="30 06 16 ? * *")
+   // @Scheduled(cron="30 06 16 ? * *")
     public void alertForDay_test(){
     	alertDay(3600, 0);
     	alertDay(3600, 1);
