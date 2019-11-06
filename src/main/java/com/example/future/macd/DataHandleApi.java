@@ -502,7 +502,7 @@ public class DataHandleApi {
 						LOGGER.info("黄线Dea:" + todayEntity.getDea() + ", 柱子（前，昨，今）：" + ppEntity.getMacd() + ","
 								+ preEntity.getTime() + ":" + preEntity.getMacd() + "," + todayEntity.getMacd());
 
-						alertCodeList.add(symbol.getString("Symbol"));
+						alertCodeList.add(JsonUtils.getName(symbol.getString("Symbol")));
 
 						LOGGER.info("======================================================================");
 					}

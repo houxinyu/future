@@ -23,6 +23,7 @@ import com.example.future.config.FutureConfig;
 import com.example.future.service.FutureService;
 import com.example.future.service.MailService;
 import com.example.future.tools.DingDingMessageUtil;
+import com.example.future.tools.JsonUtils;
 
 @Component
 @ConfigurationProperties
@@ -122,7 +123,7 @@ public class FutureSchedule {
     
     
    //day预警type0,type1,type2
-    //@Scheduled(cron="30 33 14 ? * *")
+    @Scheduled(cron="30 06 16 ? * *")
     public void alertForDay_test(){
     	alertDay(3600, 0);
     	alertDay(3600, 1);
@@ -146,11 +147,11 @@ public class FutureSchedule {
 		
 		LOGGER.info("执行任务：" + new Date());
 		
-		if(map.size() == 0) {
-			for(String name:config.getAlertNameList()) {
-				map.put(name.split("_")[0], name.split("_")[1]);
-			}
-		}
+//		if(map.size() == 0) {
+//			for(String name:config.getAlertNameList()) {
+//				map.put(name.split("_")[0], name.split("_")[1]);
+//			}
+//		}
 		
 		ArrayList<String> list = futureService.futureAlert(min, type);
 		
@@ -158,10 +159,10 @@ public class FutureSchedule {
 		Set<String> alertSet = new HashSet<>();
 		for(int i=0; i<list.size(); i++) {
 			if(!alertSet.contains(list.get(i).replaceAll("[0-9]+", ""))) {
-				if(map.get(list.get(i)) != null) {
-					alertList.add(map.get(list.get(i)) + "(" + list.get(i) + ")");
+				if(JsonUtils.getName(list.get(i)) != null) {
+					alertList.add(JsonUtils.getName(list.get(i)));
 				}else {
-					alertList.add(list.get(i) + "(" + list.get(i) + ")");
+					alertList.add(list.get(i));
 				}
 			}
 			alertSet.add(list.get(i).replaceAll("[0-9]+", ""));
@@ -201,11 +202,11 @@ public class FutureSchedule {
 		
 		LOGGER.info("执行任务：" + new Date());
 		
-		if(map.size() == 0) {
-			for(String name:config.getAlertNameList()) {
-				map.put(name.split("_")[0], name.split("_")[1]);
-			}
-		}
+//		if(map.size() == 0) {
+//			for(String name:config.getAlertNameList()) {
+//				map.put(name.split("_")[0], name.split("_")[1]);
+//			}
+//		}
 		
 		ArrayList<String> list = futureService.futureAlertDay(min, type);
 		
@@ -213,10 +214,10 @@ public class FutureSchedule {
 		Set<String> alertSet = new HashSet<>();
 		for(int i=0; i<list.size(); i++) {
 			if(!alertSet.contains(list.get(i).replaceAll("[0-9]+", ""))) {
-				if(map.get(list.get(i)) != null) {
-					alertList.add(map.get(list.get(i)) + "(" + list.get(i) + ")");
+				if(JsonUtils.getName(list.get(i)) != null) {
+					alertList.add(JsonUtils.getName(list.get(i)));
 				}else {
-					alertList.add(list.get(i) + "(" + list.get(i) + ")");
+					alertList.add(list.get(i));
 				}
 			}
 			alertSet.add(list.get(i).replaceAll("[0-9]+", ""));

@@ -21,6 +21,7 @@ public class JsonUtils {
 	
 	static JSONArray symbolArray = null;
 	static Map<String,Integer> typeMap = new HashMap<>();
+	static Map<String,String> nameMap = new HashMap<>();
 	
 	/**
      * 读取json文件，返回json串
@@ -88,6 +89,7 @@ public class JsonUtils {
     		        for(Object o:symbolArray) {
     		        	JSONObject jo = (JSONObject) o;
     		        	typeMap.put(jo.getString("Symbol"), Integer.valueOf(jo.getIntValue("Type")));
+    		        	nameMap.put(jo.getString("Symbol"), jo.getString("Name"));
     		        }
     			}
     		}
@@ -113,6 +115,15 @@ public class JsonUtils {
     	}
     }
     
+    public static String getName(String symbol) {
+    	String name = nameMap.get(symbol);
+    	if(name == null) {
+    		return symbol;
+    	} else {
+    		return name;
+    	}
+    }
+    
     public static void main(String[] args) throws  Exception{
         JSONArray symbolArray = readSymbols();
         for (int i = 0 ; i < symbolArray.size();i++){
@@ -121,5 +132,7 @@ public class JsonUtils {
             String symbol = (String)key1.get("Symbol");
             System.out.println(fullSymbol + "," + symbol);
         }
+        
+        System.out.println("test:" + JsonUtils.getName("V2001"));
     }
 }
