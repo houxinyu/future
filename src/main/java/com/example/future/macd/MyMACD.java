@@ -191,6 +191,9 @@ public class MyMACD {
 		if (ce.getPreIndex() == -1) {
 			return null;
 		}
+		if(ce.getPreIndex()>=list.size()) {
+			System.out.println(ce.getName());
+		}
 		return list.get(ce.getPreIndex());
 	}
 

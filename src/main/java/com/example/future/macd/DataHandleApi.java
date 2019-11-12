@@ -162,11 +162,11 @@ public class DataHandleApi {
 				ArrayList<KEntity> cacheList = AlertUtil.getListFromMap(symbol.getString("Symbol")+min);
 				if(cacheList==null) {
 					//如果1H数据为空，则先抓取一下数据:
-					if(cacheList == null || cacheList.size() == 0) {
-						//每天加载一次1小时数据
-						loadHistoryData("1H", type);
-						cacheList = AlertUtil.getListFromMap(symbol.getString("Symbol")+min);
-					}
+//					if(cacheList == null || cacheList.size() == 0) {
+//						//每天加载一次1小时数据
+//						loadHistoryData("1H", type);
+//						cacheList = AlertUtil.getListFromMap(symbol.getString("Symbol")+min);
+//					}
 					if(cacheList==null) {
 						cacheList = new ArrayList<KEntity>();
 					}
@@ -179,7 +179,7 @@ public class DataHandleApi {
 					if(min == 30) {
 						ArrayList<KEntity> halfList = new ArrayList<>();
 						mergeHalfHourData(fiftenList,halfList);
-						AlertUtil.putListToMap(halfList.get(0).getName() + "30", fiftenList);
+						AlertUtil.putListToMap(halfList.get(0).getName() + "30", halfList);
 					} else if (min == 60) {
 						ArrayList<KEntity> hourList = new ArrayList<>();
 						mergeHourData(fiftenList, hourList, cacheList);
@@ -208,7 +208,7 @@ public class DataHandleApi {
 				//组装所有历史数据
 				for(; i >= 0;) {
 					KEntity newKEntity;
-					if(i ==0) {
+					if(i ==0 || fiftenList.get(i).getTime().contains("14:45:00")) {
 						newKEntity = mergeMuilt(fiftenList.get(i));
 						i -=1;
 					}else {
@@ -257,7 +257,9 @@ public class DataHandleApi {
 			if(cacheList.get(n).getTime().equals(fiftenList.get(i).getTime())) {
 				break;
 			}else {
-				hourList.add((KEntity)cacheList.get(n).clone());
+				KEntity newEntity = (KEntity)cacheList.get(n).clone();
+				newEntity.setPreIndex(hourList.size()-1);
+				hourList.add(newEntity);
 			}
 		}
 		
@@ -302,7 +304,9 @@ public class DataHandleApi {
 			if(cacheList.get(n).getTime().equals(fiftenList.get(i).getTime())) {
 				break;
 			}else {
-				hourList.add((KEntity)cacheList.get(n).clone());
+				KEntity newEntity = (KEntity)cacheList.get(n).clone();
+				newEntity.setPreIndex(hourList.size()-1);
+				hourList.add(newEntity);
 			}
 		}
 		
@@ -349,7 +353,9 @@ public class DataHandleApi {
 			if(cacheList.get(n).getTime().equals(fiftenList.get(i).getTime())) {
 				break;
 			}else {
-				hourList.add((KEntity)cacheList.get(n).clone());
+				KEntity newEntity = (KEntity)cacheList.get(n).clone();
+				newEntity.setPreIndex(hourList.size()-1);
+				hourList.add(newEntity);
 			}
 		}
 		
@@ -491,7 +497,34 @@ public class DataHandleApi {
 					//30分钟的，只接受在一侧的预警，如果后续发现1小时的信号也太多，那也采用该限制，尽量做最好的信号
 					if(min == 30) {
 						绿转 = 绿转 && todayEntity.getClose()>todayEntity.getMAn(26);
+						//绿柱数不能超过5根
+						int greenNum =0;
+						for(int k=list.size()-1;k>0;k--) {
+							if(list.get(k).getMacd()<0) {
+								greenNum++;
+							}else {
+								break;
+							}
+							if(greenNum>6) {
+								break;
+							}
+						}
+						绿转 = 绿转 && (greenNum<=6);
+						
 						红转 = 红转 && todayEntity.getClose()<todayEntity.getMAn(26);
+						//红柱数不能超过5根
+						int redNum =0;
+						for(int k=list.size()-1;k>0;k--) {
+							if(list.get(k).getMacd()>0) {
+								redNum++;
+							}else {
+								break;
+							}
+							if(redNum>6) {
+								break;
+							}
+						}
+						红转 = 红转 && (redNum<=6);
 					}
 
 					if (绿转 || 红转) {
@@ -706,16 +739,16 @@ public class DataHandleApi {
 		
 		
 		//day
-		int type = 0;
-		loadHistoryData("D", type);
-		caculateMACD(3600, type);
-		ArrayList<String> list = caculateAlert(3600, type);
-		System.out.println("list:" + list);
-		
-		ArrayList<KEntity> dayList = AlertUtil.getListFromMap(testSymbol+3600);
-		for(KEntity k:dayList) {
-			System.out.println(k.getTime() + "[" + k + "]");
-		}
+//		int type = 0;
+//		loadHistoryData("D", type);
+//		caculateMACD(3600, type);
+//		ArrayList<String> list = caculateAlert(3600, type);
+//		System.out.println("list:" + list);
+//		
+//		ArrayList<KEntity> dayList = AlertUtil.getListFromMap(testSymbol+3600);
+//		for(KEntity k:dayList) {
+//			System.out.println(k.getTime() + "[" + k + "]");
+//		}
 		
 		
 //		type = 1;
@@ -729,6 +762,18 @@ public class DataHandleApi {
 //		caculateMACD(3600, type);
 //		list = caculateAlert(3600, type);
 //		System.out.println("list:" + list);
+		
+		int type = 0;
+		loadHistoryData("15M", type);
+		mergeData(30, type);
+		caculateMACD(30, type);
+		ArrayList<String> list = caculateAlert(30, type);
+		System.out.println("list:" + list);
+		
+		ArrayList<KEntity> dayList = AlertUtil.getListFromMap(testSymbol+30);
+		for(KEntity k:dayList) {
+			System.out.println(k.getTime() + "[" + k + "]");
+		}
 		
 	}
 

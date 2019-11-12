@@ -55,6 +55,20 @@ public class FutureServiceImpl implements FutureService {
 //		return dataHandleAll.caculateAlert(min);
 //	}
 	
+	
+	
+	@Override
+	public void getFiftenDatas(int min, int type) {
+		dataHandleApi.loadHistoryData("15M", type);
+	}
+	
+	
+	
+	@Override
+	public void getHourDatas(int min, int type) {
+		dataHandleApi.loadHistoryData("1H", type);
+	}
+	
 
 	/**
 	 * 针对30分钟和60分钟
@@ -62,9 +76,9 @@ public class FutureServiceImpl implements FutureService {
 	@Override
 	public ArrayList<String> futureAlert(int min, int type) {
 		//从内存缓存获取第二页15分钟历史数据
-		dataHandleApi.loadHistoryFromMem();
+		//dataHandleApi.loadHistoryFromMem();
 		//获取最新一页15分钟历史数据
-		dataHandleApi.loadHistoryData("15M", type);
+		//dataHandleApi.loadHistoryData("15M", type);
 		//使用15分钟k线合并半小时和1小时数据
 		
 		//上面的数据如何不重复获取？

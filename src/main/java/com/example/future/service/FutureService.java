@@ -11,5 +11,9 @@ public interface FutureService {
 	public  ArrayList<String> futureAlertDay(int min, int type);
 	
 	public  ArrayList<String> futureAlert(int min, int type);
+	
+	public  void getFiftenDatas(int min, int type);
+	
+	public  void getHourDatas(int min, int type);
 
 }

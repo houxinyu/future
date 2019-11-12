@@ -32,7 +32,7 @@ public class JsonUtils {
         String jsonStr = "";
         try {
             File jsonFile = new File(fileName);
-            FileReader fileReader = new FileReader(jsonFile);
+//            FileReader fileReader = new FileReader(jsonFile);
 
             Reader reader = new InputStreamReader(new FileInputStream(jsonFile),"utf-8");
             int ch = 0;
@@ -40,7 +40,7 @@ public class JsonUtils {
             while ((ch = reader.read()) != -1) {
                 sb.append((char) ch);
             }
-            fileReader.close();
+//            fileReader.close();
             reader.close();
             jsonStr = sb.toString();
             return jsonStr;

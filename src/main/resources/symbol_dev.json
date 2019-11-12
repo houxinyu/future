@@ -1,1 +1,3 @@
-[{"FullSymbol":"DCEJD2001","Symbol":"JD2001","Name":"鸡蛋2001","Market":"DCE","Type":0,"I":4,"LTD":""}]
+[{"FullSymbol":"DCEJD2001","Symbol":"JD2001","Name":"鸡蛋2001","Market":"DCE","Type":0,"I":4,"LTD":""},
+{"FullSymbol":"CZCEOI2001","Symbol":"OI2001","Name":"菜籽油OI2001","Market":"CZCE","Type":2,"I":4,"LTD":""},
+{"FullSymbol":"DCEI2001","Symbol":"I2001","Name":"铁矿石I2001","Market":"DCE","Type":1,"I":4,"LTD":""}]
