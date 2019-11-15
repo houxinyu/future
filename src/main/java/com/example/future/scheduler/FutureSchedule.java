@@ -56,9 +56,9 @@ public class FutureSchedule {
 //    }
     @Scheduled(cron="10 29,59 21,22 ? * MON-FRI")
     public void alertFor30_1(){
-//    	alert(30, 0);
-    	alert(30, 1);
-    	alert(30, 2);
+//    	alert(30, 1);
+//    	alert(30, 2);
+    	alert(30, 1, 2);
     }
     @Scheduled(cron="10 29 23 ? * MON-FRI")
     public void alertFor30_2(){
@@ -66,21 +66,15 @@ public class FutureSchedule {
     }
     @Scheduled(cron="10 29,59 9 ? * MON-FRI")
     public void alertFor30_3(){
-    	alert(30, 0);
-    	alert(30, 1);
-    	alert(30, 2);
+    	alert(30, 0, 1, 2);
     }
     @Scheduled(cron="10 44 10,13,14 ? * MON-FRI")
     public void alertFor30_4(){
-    	alert(30, 0);
-    	alert(30, 1);
-    	alert(30, 2);
+    	alert(30, 0, 1, 2);
     }
     @Scheduled(cron="10 14 11,13,14 ? * MON-FRI")
     public void alertFor30_5(){
-    	alert(30, 0);
-    	alert(30, 1);
-    	alert(30, 2);
+    	alert(30, 0, 1, 2);
     }
     
     

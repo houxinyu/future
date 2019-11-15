@@ -30,4 +30,5 @@
 {"FullSymbol":"SHFEHC2001","Symbol":"HC2001","Name":"热轧卷板2001","Market":"SHFE","Type":1,"I":4,"LTD":""},
 {"FullSymbol":"CZCEFG2001","Symbol":"FG2001","Name":"玻璃FG2001","Market":"CZCE","Type":2,"I":4,"LTD":""},
 {"FullSymbol":"DCECS2001","Symbol":"CS2001","Name":"玉米淀粉CS2001","Market":"DCE","Type":1,"I":4,"LTD":""},
-{"FullSymbol":"SHFERU2001","Symbol":"RU2001","Name":"橡胶RU2001","Market":"SHFE","Type":1,"I":4,"LTD":""}]
+{"FullSymbol":"SHFERU2001","Symbol":"RU2001","Name":"橡胶RU2001","Market":"SHFE","Type":1,"I":4,"LTD":""},
+{"FullSymbol":"CZCEUR2001","Symbol":"UR2001","Name":"尿素2001","Market":"CZCE","Type":0,"I":4,"LTD":""}]
