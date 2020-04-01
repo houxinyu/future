@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import com.example.future.macd.DataHandle2;
 import com.example.future.macd.DataHandle3;
 import com.example.future.macd.DataHandleApi;
+import com.example.future.scheduler.FutureSchedule;
 import com.example.future.service.FutureService;
 
 
@@ -66,7 +67,12 @@ public class FutureServiceImpl implements FutureService {
 	
 	@Override
 	public void getHourDatas(int min, int type) {
-		dataHandleApi.loadHistoryData("1H", type);
+		if(min==60) {
+			dataHandleApi.loadHistoryData("1H", type);
+		}else {
+			dataHandleApi.loadHistoryData("30M", type);
+		}
+		
 	}
 	
 
@@ -77,11 +83,20 @@ public class FutureServiceImpl implements FutureService {
 	public ArrayList<String> futureAlert(int min, int type) {
 		//从内存缓存获取第二页15分钟历史数据
 		//dataHandleApi.loadHistoryFromMem();
-		//获取最新一页15分钟历史数据
-		//dataHandleApi.loadHistoryData("15M", type);
+		
+		//获取最新一页15分钟历史数据，抓取一次总共需要10秒钟左右
+		dataHandleApi.loadHistoryData("15M", type);
 		//使用15分钟k线合并半小时和1小时数据
 		
+		//抓取1小时数据，抓取一次需要10秒钟左右，每天只会抓一次
+    	if(!FutureSchedule.haveGettedHourDatas) {
+    		FutureSchedule.haveGettedHourDatas = true;
+    		dataHandleApi.loadHistoryData("1H", type);
+    	}
+		
 		//上面的数据如何不重复获取？
+		//2020年3月3日，最近因为夜盘不开，导致以前有夜盘的品种15分钟数据混乱，直接使用1小时数据即可
+		//但是抓1小时数据的时候，不能从第二页，而是从第1页开始
 		dataHandleApi.mergeData(min, type);
 		
 		dataHandleApi.caculateMACD(min, type);

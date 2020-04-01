@@ -74,6 +74,7 @@ public class DataHandleApi {
 				JSONArray dataArray = null;
 				if(min.equals("1H")) {
 					dataArray = getHistoryData(symbol.getString("FullSymbol"),min, 2, 100, 1);
+					//dataArray = getHistoryData(symbol.getString("FullSymbol"),min, 1, 200, 1);
 				} else {
 					dataArray = getHistoryData(symbol.getString("FullSymbol"),min, 1, 500, 1);
 				}
@@ -83,7 +84,8 @@ public class DataHandleApi {
 				LOGGER.info("======================="+symbol.getString("FullSymbol")+ ":" + dataArray.size() + "=======================");
 				ArrayList<KEntity> list = new ArrayList<KEntity>();
 				if(min.equals("30M") || min.equals("1H") || min.equals("D")) {
-					for(int i=dataArray.size()-1;i>=0;i--) {
+//					for(int i=dataArray.size()-1;i>=0;i--) {
+					for(int i=0;i<dataArray.size();i++) {
 						JSONObject kdata = (JSONObject)dataArray.get(i);
 						String tp=getTpFromName(symbol.getString("Market"));
 						KEntity kEntity = new KEntity();
@@ -105,7 +107,11 @@ public class DataHandleApi {
 						kEntity.setLow(Float.parseFloat(kdata.getString("L")));
 						kEntity.setClose(Float.parseFloat(kdata.getString("C")));
 						kEntity.setPreIndex(list.size()-1);
-						list.add(kEntity);
+						if(type == 0 && (kEntity.getTime().indexOf("20:")!=-1||kEntity.getTime().indexOf("21:")!=-1||kEntity.getTime().indexOf("22:")!=-1||kEntity.getTime().indexOf("23:")!=-1)) {
+							
+						}else {
+							list.add(kEntity);
+						}
 					}
 				} else {
 					for(Object k:dataArray) {
@@ -130,7 +136,12 @@ public class DataHandleApi {
 						kEntity.setLow(Float.parseFloat(kdata.getString("L")));
 						kEntity.setClose(Float.parseFloat(kdata.getString("C")));
 						kEntity.setPreIndex(list.size()-1);
-						list.add(kEntity);
+						if(type == 0 && (kEntity.getTime().indexOf("20:")!=-1||kEntity.getTime().indexOf("21:")!=-1||kEntity.getTime().indexOf("22:")!=-1||kEntity.getTime().indexOf("23:")!=-1)) {
+							
+						}else {
+							list.add(kEntity);
+						}
+						
 					}
 				}
 
@@ -156,6 +167,7 @@ public class DataHandleApi {
 	 */
 	public static void mergeData(int min, int type) {
 		JSONArray symbolArray = JsonUtils.readSymbols();
+		LOGGER.info("合并" + " " +min+ "分钟数据开始。。。");
 		for(Object s:symbolArray) {
 			JSONObject symbol = (JSONObject)s;
 			if(symbol.getInteger("Type") == type) {
@@ -176,6 +188,7 @@ public class DataHandleApi {
 				
 				//使用15分钟list，合并成半小时或1小时，然后AlertUtil.putListToMap(key, list);
 				if(fiftenList != null && fiftenList.size()>0) {
+					LOGGER.info("合并" + symbol.getString("Name"));
 					if(min == 30) {
 						ArrayList<KEntity> halfList = new ArrayList<>();
 						mergeHalfHourData(fiftenList,halfList);
@@ -191,6 +204,7 @@ public class DataHandleApi {
 			}
 			
 		}
+		LOGGER.info("合并" + " " +min+ "分钟数据结束。。。");
 	}
 	
 	
@@ -460,10 +474,12 @@ public class DataHandleApi {
 
 	public static void caculateMACD(int min, int type) {
 		JSONArray symbolArray = JsonUtils.readSymbols();
+		LOGGER.info("计算  " +min+ "分钟MACD开始。。。");
 		for(Object s:symbolArray) {
 			JSONObject symbol = (JSONObject)s;
 			if(symbol.getInteger("Type") == type) {
 				ArrayList<KEntity> list = AlertUtil.getListFromMap(symbol.getString("Symbol") + min);
+				LOGGER.info("计算:" + symbol.getString("Name"));
 				if (list != null && list.size() != 0) {
 //					MyMA.setMA(list, 20);
 					MyMA.setMA(list, 26);
@@ -471,15 +487,18 @@ public class DataHandleApi {
 				}
 			}
 		}
+		LOGGER.info("计算  " +min+ "分钟MACD结束。。。");
 	}
 
 	public static ArrayList<String> caculateAlert(int min, int type) {
 		ArrayList<String> alertCodeList = new ArrayList<>();
 		
 		JSONArray symbolArray = JsonUtils.readSymbols();
+		LOGGER.info("预警"  + " " +min+ "分钟开始。。。");
 		for(Object s:symbolArray) {
 			JSONObject symbol = (JSONObject)s;
 			if(symbol.getInteger("Type") == type) {
+				LOGGER.info("预警:" + symbol.getString("Name"));
 				ArrayList<KEntity> list = AlertUtil.getListFromMap(symbol.getString("Symbol") + min);
 				if (list == null || list.size() == 0) {
 					LOGGER.warn(symbol.getString("Symbol") + "数据不存在！");
@@ -541,10 +560,12 @@ public class DataHandleApi {
 					}
 
 				}
+				
+				
 			}
 			
 		}
-
+		LOGGER.info("预警"  + " " +min+ "分钟结束。。。");
 		LOGGER.info("alertCodeList size:" + alertCodeList.size());
 
 		return alertCodeList;
@@ -677,10 +698,25 @@ public class DataHandleApi {
 	    return dataArray;
 	}
 	
+    public static void printMinKline(int min) {
+		JSONArray symbolArray = JsonUtils.readSymbols();
+		for(Object s:symbolArray) {
+			JSONObject symbol = (JSONObject)s;
+			ArrayList<KEntity> cacheList = AlertUtil.getListFromMap(symbol.getString("Symbol")+min);
+			LOGGER.info("==============================================");
+			LOGGER.info(symbol.getString("Symbol") + min +" 分钟数据：");
+			int i = 0;
+			for(KEntity k:cacheList) {
+				LOGGER.info((i++)+"\t"+k.getTime()+"\t"+k.getOpen()+"\t"+k.getHigh()+"\t"+k.getLow()+"\t"+k.getClose()+"\t"+k.getMacd()+"\t"+k.getDif()+"\t"+k.getDea());
+			}
+		}
+    	
+    }
+	
 	
 	public static void main(String[] args) {
 
-		String testSymbol = "JD2001";
+		String testSymbol = "JD2005";
 //		int type = 0;
 //		
 //		ArrayList<KEntity> cacheList = AlertUtil.getListFromMap(testSymbol+60);
@@ -763,17 +799,24 @@ public class DataHandleApi {
 //		list = caculateAlert(3600, type);
 //		System.out.println("list:" + list);
 		
+		/**
 		int type = 0;
 		loadHistoryData("15M", type);
 		mergeData(30, type);
 		caculateMACD(30, type);
 		ArrayList<String> list = caculateAlert(30, type);
-		System.out.println("list:" + list);
+		//System.out.println("list:" + list);
+		printMinKline(30);
 		
 		ArrayList<KEntity> dayList = AlertUtil.getListFromMap(testSymbol+30);
 		for(KEntity k:dayList) {
 			System.out.println(k.getTime() + "[" + k + "]");
 		}
+		*/
+		
+		
+		JSONArray array =  getHistoryData("SHFERU2005","1H", 1, 200, 1);
+		System.out.println(array.toJSONString());
 		
 	}
 

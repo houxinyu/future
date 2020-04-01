@@ -22,6 +22,7 @@ public class JsonUtils {
 	static JSONArray symbolArray = null;
 	static Map<String,Integer> typeMap = new HashMap<>();
 	static Map<String,String> nameMap = new HashMap<>();
+	static Map<String,String> symbolMap = new HashMap<>();
 	
 	/**
      * 读取json文件，返回json串
@@ -90,7 +91,9 @@ public class JsonUtils {
     		        	JSONObject jo = (JSONObject) o;
     		        	typeMap.put(jo.getString("Symbol"), Integer.valueOf(jo.getIntValue("Type")));
     		        	nameMap.put(jo.getString("Symbol"), jo.getString("Name"));
+    		        	symbolMap.put(jo.getString("Name"), jo.getString("Symbol"));
     		        }
+    		        
     			}
     		}
     	}
@@ -122,6 +125,14 @@ public class JsonUtils {
     	} else {
     		return name;
     	}
+    }
+    
+    public static String getSymbol(String name) {
+    	String symbol = symbolMap.get(name);
+    	if(null == symbol) {
+    		return name;
+    	}
+    	return symbol;
     }
     
     public static void main(String[] args) throws  Exception{
